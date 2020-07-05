@@ -3,5 +3,10 @@
 
 适用于cobalt strike3.x与cobalt strike4.x的插件
 
-###功能简介
+# 功能简介
 ![](img/xx.png)
+![](img/pz.png)
+![](img/qx.png)
+![](img/nw.png)
+![](img/xt.png)
+![](img/yl.png)
