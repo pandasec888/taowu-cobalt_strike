@@ -2,7 +2,7 @@
 #                            #
 #                            #
 #                            #
-#       Xway@panda           #
+#       Xway.cn@panda        #
 #                            #
 #                            #
 #                            #
@@ -11,11 +11,14 @@ popup beacon_bottom {
     menu "梼杌"{
         
         include(script_resource("modules/discovery.cna"));
+        include(script_resource("modules/Vulnerability.cna"));
 		include(script_resource("modules/credential access.cna"));
 		include(script_resource("modules/privilege.cna"));
+		include(script_resource("modules/brute force.cna"));
 		include(script_resource("modules/Intranet penetration.cna"));
 		include(script_resource("modules/system.cna"));
 		include(script_resource("modules/entertainment.cna"));
+		include(script_resource("modules/about.cna"));
 
 	
     }
