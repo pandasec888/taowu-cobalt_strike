@@ -5,8 +5,10 @@
 
 # 功能简介
 ![](img/xx.png)
+![](img/ld.png)
 ![](img/pz.png)
 ![](img/qx.png)
+![](img/bp.png)
 ![](img/nw.png)
 ![](img/xt.png)
 ![](img/yl.png)
