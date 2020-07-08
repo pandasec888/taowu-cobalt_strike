@@ -5,6 +5,8 @@
 
 适用于cobalt strike3.x与cobalt strike4.x的插件
 
+插件里面利用到的exp均为网上搜集，不保证安全问题，请务必自主进行相关安全审查！
+
 # 功能简介
 ![](img/xx.png)
 ![](img/ld.png)
