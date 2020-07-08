@@ -24,4 +24,6 @@ https://github.com/0x09AL/RdpThief
 
 https://github.com/uknowsec/sharptoolsaggressor
 
+https://github.com/lengjibo/RedTeamTools/tree/master/windows/Cobalt%20Strike
+
 如有遗漏，请见谅。
