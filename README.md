@@ -5,9 +5,6 @@
 
 适用于cobalt strike3.x与cobalt strike4.x的插件
 
-# 预告（下个版本）
-增加"提权"与"横向移动"模块
-
 # 功能简介
 ![](img/xx.png)
 ![](img/ld.png)
