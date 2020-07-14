@@ -9,7 +9,7 @@
 # [English-version](https://github.com/pandasec888/taowu-cobalt-strike/tree/english)
 感谢[vcarus](https://github.com/vcarus)提供英文翻译支持
 
-Thanks to vcarus for English translation support
+Thanks to [vcarus](https://github.com/vcarus) for English translation support
 # 功能简介
 ![](img/xx.png)
 ![](img/ld.png)
@@ -19,6 +19,8 @@ Thanks to vcarus for English translation support
 ![](img/xt.png)
 ![](img/yl.png)
 
+# 贡献者
+[vcarus](https://github.com/vcarus)
 # 参考
 https://github.com/DeEpinGh0st/Erebus
 
