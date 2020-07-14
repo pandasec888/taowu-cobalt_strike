@@ -2,7 +2,7 @@
 #                            #
 #                            #
 #                            #
-#       Xway.cn@panda        #
+#       XWAY.CN@panda        #
 #                            #
 #                            #
 #                            #
@@ -18,36 +18,36 @@ sub Send {
     }
 
 
-    menu "娱乐"{
-                item "聊天弹框" {
-            prompt_text("Alert", "你好！", lambda({
+    menu "Just for FUN"{
+        item "Promote MsgBox" {
+            prompt_text("Alert", "Helloooo!", lambda({
                 bpowershell(@ids, 'Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.Interaction]::MsgBox("' . $1 . '", "OKOnly,MsgBoxSetForeground,SystemModal,Exclamation", "")' );
-                blog(@ids,"发送消息: $1 ");
+                blog(@ids,"Send message:$1 ");
             }, @ids => $1));
         }
-        item "IE访问指定网站" {
-            prompt_text("输入网址", "https://baidu.com", lambda({
+        item "Open URL on IE" {
+            prompt_text("Insert URL", "https://baidu.com", lambda({
                 binput(@ids,"C:\\Progra~1\\Intern~1\\iexplore.exe -k $1");
                 bshell(@ids, "C:\\Progra~1\\Intern~1\\iexplore.exe -k $1");
             }, @ids => $1));
         }
 
-                item "黑屏"{
+                item "Black Screen"{
                     bshell($1,"taskkill /F /IM explorer.exe");
                 }
-                item "锁屏"{
+                item "Lock Screen"{
                     bshell($1,"rundll32.exe user32.dll,LockWorkStation");
                 }
-                item "亮屏"{
+                item "Open Screen"{
                     brun($1, "explorer.exe");
                 }
-			    item "重启" {
-             prompt_text("确定重启?", "", lambda({
+			    item "Restart" {
+             prompt_text("ARE U SURE?", "", lambda({
             bshell(@ids, "shutdown -r -t 0");
         }, @ids => $1));
     }	
-			    item "关机" {
-             prompt_text("确定?", "", lambda({
+			    item "Shutdown" {
+             prompt_text("ARE U SURE?", "", lambda({
             bshell(@ids, "shutdown -s -t 0");
         }, @ids => $1));
     }	

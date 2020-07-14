@@ -2,13 +2,13 @@
 #                            #
 #                            #
 #                            #
-#       Xway.cn@panda        #
+#       XWAY.CN@panda        #
 #                            #
 #                            #
 #                            #
 ##############################
 popup beacon_bottom {
-    menu "梼杌"{
+    menu "TaoWu"{
         
         include(script_resource("modules/discovery.cna"));
         include(script_resource("modules/Vulnerability.cna"));
