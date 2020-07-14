@@ -45,6 +45,11 @@ sub crack_run{
 	$thread = $3['thread'];
 	bshell($bid, "crack.exe -i  $+ $Name -p  $+ $port -U  $+ $username -P  $+ $password -s  $+ $type -t  $+ $thread");
 }  
-	  
+        	item "删除crack"{
+        	local('$bid');
+        	foreach $bid ($1){
+            	bshell($1, "del /f /s /q crack.exe");
+        	}
+		}  
 	  
 	  }

