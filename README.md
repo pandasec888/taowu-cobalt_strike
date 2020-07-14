@@ -19,7 +19,7 @@ Base on Cobalt Strike3.x & Cobalt Strike4.x
 
 ## Features
 ![](img/xx.png)
-![](img/xx.png)
+![](img/qx.png)
 ![](img/ld.png)
 ![](img/pz.png)
 ![](img/bp.png)
