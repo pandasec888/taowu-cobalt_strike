@@ -28,14 +28,6 @@ Base on Cobalt Strike3.x & Cobalt Strike4.x
 ![](img/yl.png)
 
 
-## CHANGE LOG
-###3.0 (2020.7.14)
-1. Add "Privilege Escalation" "Lateral Movement" function.
-2. Add "Port Forwarding" function.
-3. Performance improvements.
-![](img/qx.png)
-![](img/hx.png)
-
 
 ## Special thanks
 https://github.com/DeEpinGh0st/Erebus
@@ -47,3 +39,12 @@ https://github.com/0x09AL/RdpThief
 https://github.com/uknowsec/sharptoolsaggressor
 
 https://github.com/lengjibo/RedTeamTools/tree/master/windows/Cobalt%20Strike
+
+
+## CHANGE LOG
+###3.0 (2020.7.14)
+1. Add "Privilege Escalation" "Lateral Movement" function.
+2. Add "Port Forwarding" function.
+3. Performance improvements.
+![](img/qx.png)
+![](img/hx.png)
