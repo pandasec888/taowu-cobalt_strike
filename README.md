@@ -38,7 +38,11 @@ Base on Cobalt Strike3.x & Cobalt Strike4.x
 
 ## Special thanks
 https://github.com/DeEpinGh0st/Erebus
+
 https://github.com/timwhitez/Cobalt-Strike-Aggressor-Scripts
+
 https://github.com/0x09AL/RdpThief
+
 https://github.com/uknowsec/sharptoolsaggressor
+
 https://github.com/lengjibo/RedTeamTools/tree/master/windows/Cobalt%20Strike
