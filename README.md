@@ -6,6 +6,8 @@
 适用于cobalt strike3.x与cobalt strike4.x的插件
 
 插件里面利用到的exp均为网上搜集，不保证安全问题，请务必自主进行相关安全审查！
+# [English-version](https://github.com/pandasec888/taowu-cobalt-strike/tree/english)
+
 # 更新3.0（2020.7.14）
 1.增加“权限提升”“横向移动”模块
 
