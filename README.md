@@ -15,7 +15,7 @@ Thanks to [vcarus](https://github.com/vcarus) for English translation support
 ![](img/hx.png)
 
 # 贡献者
-[vcarus](https://github.com/vcarus)
+[vcarus](https://twitter.com/h4ltorg)
 # 参考
 https://github.com/DeEpinGh0st/Erebus
 
