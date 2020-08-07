@@ -7,9 +7,9 @@
 
 插件里面利用到的exp均为网上搜集，不保证安全问题，请务必自主进行相关安全审查！
 # [English-version](https://github.com/pandasec888/taowu-cobalt-strike/tree/english)
-感谢[vcarus](https://github.com/vcarus)提供英文翻译支持
+感谢[vcarus](https://twitter.com/h4ltorg)提供英文翻译支持
 
-Thanks to [vcarus](https://github.com/vcarus) for English translation support
+Thanks to [vcarus](https://twitter.com/h4ltorg) for English translation support
 # 功能简介
 ![](img/qx.png)
 ![](img/hx.png)
