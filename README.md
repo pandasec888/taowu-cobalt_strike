@@ -42,6 +42,12 @@ https://github.com/lengjibo/RedTeamTools/tree/master/windows/Cobalt%20Strike
 
 
 ## CHANGE LOG
+### 3.1 (2020.8.7)
+1. Add Basic Info and Initial Info gathering to Information Discovery.
+2. Add CISCO ASA(CVE-2020-3452)、weblogic（CVE-2016-0638,CVE-2016-3510,CVE-2017-3248,CVE-2017-10271,CVE-2018-2628,CVE-2018-2893,CVE-2019-2725）POCs to Vulnerability.
+3. Add dazzleUP to Privilege Escalation.
+4. Add some interesting functions for mic recording and webcam shot.
+
 ###3.0 (2020.7.14)
 1. Add "Privilege Escalation" "Lateral Movement" function.
 2. Add "Port Forwarding" function.

