@@ -48,7 +48,8 @@ https://github.com/lengjibo/RedTeamTools/tree/master/windows/Cobalt%20Strike
 3. Add dazzleUP to Privilege Escalation.
 4. Add some interesting functions for mic recording and webcam shot.
 
-###3.0 (2020.7.14)
+
+### 3.0 (2020.7.14)
 1. Add "Privilege Escalation" "Lateral Movement" function.
 2. Add "Port Forwarding" function.
 3. Performance improvements.
