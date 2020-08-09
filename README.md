@@ -16,6 +16,7 @@ Thanks to [vcarus](https://twitter.com/h4ltorg) for English translation support
 
 # 贡献者
 [vcarus](https://twitter.com/h4ltorg)
+
 [NULLB8](https://github.com/NULLB8)
 # 参考
 https://github.com/DeEpinGh0st/Erebus
