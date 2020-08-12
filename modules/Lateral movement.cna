@@ -211,7 +211,7 @@ sub WMIHACKER_download{
         }
 sub SharpDomainSpray {
 	$arg = join(' ', @($3['type'],$3['content']));
-	bexecute_assembly($bid, script_resource("/script/SharpDomainSpray/SharpDomainSpray.exe"), $arg);
+	bexecute_assembly($bid, script_resource("/script/SharpDomainSpray.exe"), $arg);
 } 
 
 		item "获取SPN" {
