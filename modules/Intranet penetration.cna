@@ -79,7 +79,7 @@ sub iox {
     }
                 item "运行iox"{
                     $bid = $1['@'];
-                    $Dialog = dialog("运行iox",%(lhost => "127.0.0.1:3389", rhost => "*8.8.8.8:3389", hex => "65535",bid => $bid),&iox_run);
+                    $Dialog = dialog("运行iox",%(lhost => "127.0.0.1:3389", rhost => "*8.8.8.8:3389", hex => "656565",bid => $bid),&iox_run);
                     dialog_description($Dialog, "lhost:./iox fwd -r 192.168.0.100:3389 -r *1.1.1.1:8888 -k 656565 rhost:./iox fwd -l *8888 -l 33890 -k 656565");
                     drow_text($Dialog, "lhost", "lhost: ");
                     drow_text($Dialog, "rhost", "rhost: ");
