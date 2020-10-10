@@ -11,9 +11,11 @@
 
 Thanks to [vcarus](https://twitter.com/h4ltorg) for English translation support
 # 功能简介
+![](img/xx.png)
+![](img/pz.png)
 ![](img/qx.png)
-![](img/hx.png)
-
+![](img/xt.png)
+![](img/yl.png)
 # 贡献者
 [vcarus](https://twitter.com/h4ltorg)
 
