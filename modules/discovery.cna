@@ -464,7 +464,7 @@ sub listlogs {
                 dialog_show($Dialog);
             }
 				item "查看RDP记录-Ladon"{
-				bexecute_assembly($1, script_resource('/script/Ladon1.exe'), "RdpLog");
+				bexecute_assembly($1, script_resource('/script/Ladon.exe'), "RdpLog");
             }
 				item "获取RDP与putty信息"{
 				bexecute_assembly($1, script_resource('/script/SessionSearcher.exe'), "");
