@@ -15,7 +15,7 @@
             }
     	}
 sub internal_monologue{
-	$binary = "script/InternalMonologue.exe";
+	$binary = script_resource("/script/InternalMonologue.exe");
 	$help = "Internal Monologue Attack: Retrieving NTLM Hashes without Touching LSASS";
 	beacon_command_register("lazagne", $help, "Internal Monologue Attack: Retrieving NTLM Hashes without Touching LSASS.\n\n$help");
 	if(!-exists $binary)
