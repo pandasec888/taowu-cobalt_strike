@@ -23,6 +23,12 @@ Thanks to [vcarus](https://twitter.com/h4ltorg) for English translation support
 [vcarus](https://twitter.com/h4ltorg)
 
 [NULLB8](https://github.com/NULLB8)
+# Tips
+1.梼杌本身是一个原创加学习结合的项目，一开始就具备了包容的属性，感谢github具有分享精神的大佬开源了这么多优秀的代码，站在巨人的肩膀上总是能看见更大的世界。
+
+2.为了更好的维护该项目，现邀请对此项目感兴趣的所有人共同参与维护开发，项目维护开发不限功能不限技术水平，即使只是输出一个whoami。参与维护的大佬可以直接将代码提交至github或者发送到邮箱taowuopen@protonmail.com或者加入知识星球进行交流。
+
+3.参与维护开发的大佬请在邮件中注明自己的ID与github或是博客地址，以上内容将永久附在github项目页面以及梼杌关于模块一栏。
 
 # 知识星球
 分享与交流一线红队知识与技术。星主参与近三十场攻防演练，均为红队。希望借助知识星球社群认识更多的人以及学习更多的知识与技术，与同样热衷网络安全红队技术的人共同进步，提高自身技术水平的同时为网络安全行业贡献绵薄之力。
