@@ -11,11 +11,14 @@
 
 Thanks to [vcarus](https://twitter.com/h4ltorg) for English translation support
 # 功能简介
-![](img/xx.png)
+### 公开版
 ![](img/pz.png)
-![](img/qx.png)
+![](img/tq.png)
 ![](img/xt.png)
-![](img/yl.png)
+### 完整版
+![](img/pzs.png)
+![](img/tqs.png)
+![](img/xts.png)
 # 贡献者
 [vcarus](https://twitter.com/h4ltorg)
 
