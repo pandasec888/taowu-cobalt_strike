@@ -3,7 +3,7 @@
 
 # 仅供交流与学习使用，请勿用于非法用途！
 
-适用于cobalt strike3.x与cobalt strike4.x的插件
+基于cobalt strike平台的红队自动化框架
 
 插件里面利用到的exp均为网上搜集，不保证安全问题，请务必自主进行相关安全审查！
 # [English-version](https://github.com/pandasec888/taowu-cobalt-strike/tree/english)
