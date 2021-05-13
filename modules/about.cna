@@ -8,6 +8,6 @@
 #                            #
 ##############################
 menu "关于" {
-    item("&Xway.cn@panda", { url_open("https://github.com/pandasec888/taowu-cobalt-strike"); });
+    item("&xway.cn@panda8", { url_open("https://github.com/pandasec888/taowu-cobalt-strike"); });
         }
 
