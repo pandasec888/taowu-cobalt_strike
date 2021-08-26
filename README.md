@@ -13,4 +13,4 @@
 2.投稿红队相关原创技术文章至邮箱：taowuopen@protonmail.com，经审核通过免付费邀请加入。
 
 作为回馈，星球内为成员提供梼杌(taowu-cobalt strike)完整版本(梼杌完整版将在知识星球内不定期更新)
-![](img/xingqiu.jpg)
+![](xingqiu.jpg)
