@@ -2,12 +2,16 @@
 #                            #
 #                            #
 #                            #
-#       Xway.cn@panda        #
+#       xway.cn@panda8       #
+#       secquan.org@panda8    #
+#		t00ls.com@panda8     #
 #                            #
 #                            #
 #                            #
 ##############################
 menu "关于" {
-    item("&xway.cn@panda8", { url_open("https://github.com/pandasec888/taowu-cobalt-strike"); });
+    item("&xway.cn@panda8", { url_open("https://github.com/pandasec888"); });
+	item("&secquan.org@panda8", { url_open("https://github.com/pandasec888"); });
+	item("&t00ls.com@panda8", { url_open("https://github.com/pandasec888"); });
         }
 

