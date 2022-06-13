@@ -11,9 +11,11 @@ taowu的script目录下所有文件均为网上搜集，不保证安全问题，
 
 Thanks to [vcarus](https://twitter.com/h4ltorg) for English translation support
 # 功能简介
-![](img/pzs.png)
-![](img/tqs.png)
-![](img/xts.png)
+![](img/xx.png)
+![](img/pz.png)
+![](img/tq.png)
+![](img/xt.png)
+![](img/gy.png)
 # 贡献者
 [vcarus](https://twitter.com/h4ltorg)
 
