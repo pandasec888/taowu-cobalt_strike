@@ -13,7 +13,6 @@ Thanks to [vcarus](https://twitter.com/h4ltorg) for English translation support
 # 功能简介
 ![](img/xx.png)
 ![](img/pz.png)
-![](img/tq.png)
 ![](img/xt.png)
 ![](img/gy.png)
 # 贡献者
