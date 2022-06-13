@@ -2,7 +2,9 @@
 #                            #
 #                            #
 #                            #
-#       Xway.cn@panda        #
+#       xway.cn@panda8       #
+#       secquan.org@panda8   #
+#		t00ls.com@panda8     #
 #                            #
 #                            #
 #                            #
@@ -11,6 +13,8 @@ popup beacon_bottom {
     menu "梼杌"{
         
         include(script_resource("modules/discovery.cna"));
+		include(script_resource("modules/Intranet.cna"));
+
 		include(script_resource("modules/credential access.cna"));
 		include(script_resource("modules/privilege.cna"));
 		include(script_resource("modules/privilege escalation.cna"));
@@ -19,8 +23,8 @@ popup beacon_bottom {
 		include(script_resource("modules/Lateral movement.cna"));
 		include(script_resource("modules/system.cna"));
 		include(script_resource("modules/entertainment.cna"));
+		include(script_resource("modules/SharpDPAPI.cna"));
 		include(script_resource("modules/about.cna"));
-
 
 
 	
