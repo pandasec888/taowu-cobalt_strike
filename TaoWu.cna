@@ -14,7 +14,6 @@ popup beacon_bottom {
         
         include(script_resource("modules/discovery.cna"));
 		include(script_resource("modules/Intranet.cna"));
-
 		include(script_resource("modules/credential access.cna"));
 		include(script_resource("modules/privilege.cna"));
 		include(script_resource("modules/privilege escalation.cna"));
