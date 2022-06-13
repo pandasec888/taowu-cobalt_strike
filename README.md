@@ -3,7 +3,7 @@
 
 ![Alt text](https://github.com/pandasec888/taowu-cobalt-strike/blob/master/img/timg.jpg)
 
-# 仅供交流与学习使用，请勿用于非法用途！
+# 仅供交流与学习使用，严禁用于非法用途！
 
 taowu的script目录下所有文件均为网上搜集，不保证安全问题，请务必自主进行相关安全审查！
 # [English-version](https://github.com/pandasec888/taowu-cobalt-strike/tree/english)
