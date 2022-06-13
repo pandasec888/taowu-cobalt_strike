@@ -4,7 +4,7 @@
 #                            #
 #       xway.cn@panda8       #
 #       secquan.org@panda8   #
-#		t00ls.com@panda8     #
+#	t00ls.com@panda8     #
 #                            #
 #                            #
 #                            #
@@ -507,12 +507,12 @@ sub gethtml {
 
 			item "Async上线" {
 				$bid = $1;
-				$dialog = dialog("内存加载Async服务端上线", %(bid => $bid), &asyncrat);
+				$dialog = dialog("内存加载Async服务端上线", %(bid => $bid), &asyncc);
 				drow_file($dialog, "server", "server: ");			
 				dbutton_action($dialog, "运行");
 				dialog_show($dialog);
         }	
-sub asyncrat {
+sub asyncc {
         bexecute_assembly($bid, $3['server']);
     }
 
